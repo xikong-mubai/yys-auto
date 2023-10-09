@@ -22,7 +22,7 @@ def rand_num(x, y):
 
 # 获取阴阳师运行状态
 def get_windows(windowsname,filename):
-    #try:
+    try:
         # 获取窗口句柄
         yys_handle = win32gui.FindWindow(None,windowsname)
         # 控制窗口的位置和大小 
@@ -75,5 +75,5 @@ def get_windows(windowsname,filename):
         saveDC.DeleteDC()
         newhdDC.DeleteDC()
         win32gui.ReleaseDC(yys_handle,yys_hdDC)
-    #except Exception as error:
-    #    print("get_window error!!!\n",error)
+    except Exception as error:
+        print("get_window error!!!\n",error)

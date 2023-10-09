@@ -3,11 +3,14 @@ from PIL import Image
 import pyautogui,time,pythoncom
 # 获取权限
 import ctypes, sys, os
-from .util import is_admin,get_windows
+from .util import is_admin,get_windows,rand_num
+
+yys_window_name = "阴阳师-网易游戏"
+tempimg_name = "123.png"
 
 # 挖土
 def watu():
-    get_windows("阴阳师-网易游戏","123.png")
+    get_windows(yys_window_name,tempimg_name)
     #get_windows('readme.txt - 记事本','123.png')
     num = 0
     flag = eval(input("准备刷多少次？"))
@@ -41,22 +44,22 @@ def watu():
     y4 = int(180/681 * y4)
 
     while True:
-        get_windows("阴阳师-网易游戏","123.png")
+        get_windows(yys_window_name,tempimg_name)
         tmp_img = Image.open('123.png')
         
         if num >= flag:
             break
 
         # 判断是否在房间状态
-        sum = [0,0,0]
+        pixel_sum = [0,0,0]
         for i in range(x1_1,x1,int((x1-x1_1)/9)):
             tmp_pixel = tmp_img.getpixel((i,y1))
             room_pixel = room_img.getpixel((i,y1))
-            sum[0] += abs(tmp_pixel[0] - room_pixel[0])
-            sum[1] += abs(tmp_pixel[1] - room_pixel[1])
-            sum[2] += abs(tmp_pixel[2] - room_pixel[2])
+            pixel_sum[0] += abs(tmp_pixel[0] - room_pixel[0])
+            pixel_sum[1] += abs(tmp_pixel[1] - room_pixel[1])
+            pixel_sum[2] += abs(tmp_pixel[2] - room_pixel[2])
         
-        if abs(sum[0] / 9) < 10 and abs(sum[1] / 9) < 10 and abs(sum[2] / 10) < 10:
+        if abs(pixel_sum[0] / 9) < 10 and abs(pixel_sum[1] / 9) < 10 and abs(pixel_sum[2] / 10) < 10:
             # pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)), clicks=1, interval=rand_num(1,4), button='left', duration=rand_num(1,3), tween=pyautogui.linear)
             tmp_pixel = tmp_img.getpixel((int(0.948 * img_x),int(0.882 * img_y)))
             
@@ -68,43 +71,43 @@ def watu():
                 time.sleep(23)
         
         # 判断是否是结束一阶段
-        sum = [0,0,0]
+        pixel_sum = [0,0,0]
         for i in range(x1_1,x2,int((x2-x1_1)/9)):
             tmp_pixel = tmp_img.getpixel((i,y2))
             war1_pixel = war1_img.getpixel((i,y2))
-            sum[0] += abs(tmp_pixel[0] - war1_pixel[0])
-            sum[1] += abs(tmp_pixel[1] - war1_pixel[1])
-            sum[2] += abs(tmp_pixel[2] - war1_pixel[2])
+            pixel_sum[0] += abs(tmp_pixel[0] - war1_pixel[0])
+            pixel_sum[1] += abs(tmp_pixel[1] - war1_pixel[1])
+            pixel_sum[2] += abs(tmp_pixel[2] - war1_pixel[2])
         
-        if abs(sum[0] / 9 < 10) and abs(sum[1] / 9) < 10 and abs(sum[2] / 10) < 10:
+        if abs(pixel_sum[0] / 9 < 10) and abs(pixel_sum[1] / 9) < 10 and abs(pixel_sum[2] / 10) < 10:
             # pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)), clicks=1, interval=rand_num(1,4), button='left', duration=rand_num(1,3), tween=pyautogui.linear)
             pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)))
             time.sleep(0.3)
         
         # 判断是否是结束二阶段
-        sum = [0,0,0]
+        pixel_sum = [0,0,0]
         for i in range(x1,x3,int((x3-x1)/9)):
             tmp_pixel = tmp_img.getpixel((i,y3))
             war2_pixel = war2_img.getpixel((i,y3))
-            sum[0] += abs(tmp_pixel[0] - war2_pixel[0])
-            sum[1] += abs(tmp_pixel[1] - war2_pixel[1])
-            sum[2] += abs(tmp_pixel[2] - war2_pixel[2])
+            pixel_sum[0] += abs(tmp_pixel[0] - war2_pixel[0])
+            pixel_sum[1] += abs(tmp_pixel[1] - war2_pixel[1])
+            pixel_sum[2] += abs(tmp_pixel[2] - war2_pixel[2])
         
-        if abs(sum[0] / 9) < 10 and abs(sum[1] / 9) < 10 and abs(sum[2] / 10) < 10:
+        if abs(pixel_sum[0] / 9) < 10 and abs(pixel_sum[1] / 9) < 10 and abs(pixel_sum[2] / 10) < 10:
             # pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)), clicks=1, interval=rand_num(1,4), button='left', duration=rand_num(1,3), tween=pyautogui.linear)
             pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)))
             time.sleep(0.3)
 
         # 判断是否是 defeat
-        sum = [0,0,0]
+        pixel_sum = [0,0,0]
         for i in range(x4_1,x4_2,int((x4_2-x4_1)/9)):
             tmp_pixel = tmp_img.getpixel((i,y4))
             defeat_pixel = defeat_img.getpixel((i,y4))
-            sum[0] += abs(tmp_pixel[0] - defeat_pixel[0])
-            sum[1] += abs(tmp_pixel[1] - defeat_pixel[1])
-            sum[2] += abs(tmp_pixel[2] - defeat_pixel[2])
+            pixel_sum[0] += abs(tmp_pixel[0] - defeat_pixel[0])
+            pixel_sum[1] += abs(tmp_pixel[1] - defeat_pixel[1])
+            pixel_sum[2] += abs(tmp_pixel[2] - defeat_pixel[2])
         
-        if abs(sum[0] / 9) < 10 and abs(sum[1] / 9) < 10 and abs(sum[2] / 10) < 10:
+        if abs(pixel_sum[0] / 9) < 10 and abs(pixel_sum[1] / 9) < 10 and abs(pixel_sum[2] / 10) < 10:
             # pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)), clicks=1, interval=rand_num(1,4), button='left', duration=rand_num(1,3), tween=pyautogui.linear)
             pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)))
             time.sleep(0.3)
@@ -116,7 +119,7 @@ def watu():
     print()
 
 def yuling():
-    get_windows("阴阳师-网易游戏","123.png")
+    get_windows(yys_window_name,tempimg_name)
 
     while True:
         day = input("打哪个御灵，从左往右按御灵的开放日期算（比如周二暗神龙就输入一个“2”）：")
@@ -169,7 +172,7 @@ def yuling():
     y4 = int(180/681 * y4)
 
     while True:
-        get_windows("阴阳师-网易游戏","123.png")
+        get_windows(yys_window_name,tempimg_name)
         tmp_img = Image.open('123.png')
         
         if num >= flag:

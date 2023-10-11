@@ -3,10 +3,7 @@ from PIL import Image
 import pyautogui,time,pythoncom
 # 获取权限
 import ctypes, sys, os
-from util import is_admin,get_windows,rand_num,help,check_window
-
-yys_window_name = "阴阳师-网易游戏"
-tempimg_name = "123.png"
+from util import *
 
 # 挖土
 def watu():
@@ -16,13 +13,13 @@ def watu():
     flag = eval(input("准备刷多少次？"))
     print()
     room_img = Image.open('./img/room_wait.png')
-    check_window(room_img)
+    # check_window(room_img)
     war1_img = Image.open('./img/war_end_1.png')
-    check_window(war1_img)
+    # check_window(war1_img)
     war2_img = Image.open('./img/war_end_2.png')
-    check_window(war2_img)
+    # check_window(war2_img)
     defeat_img = Image.open('./img/defeat.png')
-    check_window(defeat_img)
+    # check_window(defeat_img)
 
     img_x,img_y = room_img.size
 

@@ -114,7 +114,7 @@ def get_windows(windowsname,filename):
                 time.sleep(0.5)
 
         # 根据句柄创建一个DC
-        newhdDC = win32ui.CreateDCFromHandle(yys_handle)
+        newhdDC = win32ui.CreateDCFromHandle(yys_hdDC)
         # 创建一个兼容设备内存的DC
         saveDC = newhdDC.CreateCompatibleDC()
         # 创建bitmap保存图片

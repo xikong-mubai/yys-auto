@@ -22,3 +22,14 @@ else:
     size = (1)
 print(win32gui.FindWindow(None,'阴阳师-网易游戏'))
 print(size)
+print(rect.right , rect.left, rect.bottom , rect.top) 
+
+#win32api.SendMessage(win32gui.FindWindow(None,'阴阳师-网易游戏'),win32con.WM_,0x1b,0)
+
+win32api.SendMessage(win32gui.FindWindow(None,'阴阳师-网易游戏'),win32con.WM_LBUTTONDOWN,0,0x3520640)
+win32api.SendMessage(win32gui.FindWindow(None,'阴阳师-网易游戏'),win32con.WM_LBUTTONUP,0,0x3520640)
+
+# time.sleep(3)
+
+# win32api.SendMessage(win32gui.FindWindow(None,'阴阳师-网易游戏'),win32con.WM_LBUTTONDOWN,0,0)
+# win32api.SendMessage(win32gui.FindWindow(None,'阴阳师-网易游戏'),win32con.WM_LBUTTONUP,0,0)

@@ -5,6 +5,9 @@ import pyautogui,time,pythoncom
 # 获取权限
 import ctypes, sys, os
 
+yys_window_name = "阴阳师-网易游戏"
+tempimg_name = "123.png"
+
 def help():
     print('1. 魂土')
     print('2. 御灵')
@@ -25,7 +28,6 @@ def get_system_dpi():
     """获取缩放后的分辨率"""
     hdc = win32gui.GetDC(0)
     x_dpi: int = win32print.GetDeviceCaps(hdc, win32con.LOGPIXELSX)
-    # y_dpi = win32print.GetDeviceCaps(hdc, win32con.LOGPIXELSY)
     screen_scale_rate=x_dpi/96
     return screen_scale_rate
  
@@ -39,11 +41,17 @@ def check_window(dst: Image):
 
     tmp = Image.open('./123.png')
     tmp_img_x,tmp_img_y = tmp.size
-    if img_x != tmp_img_x or img_y != tmp_img_y:
-        print("please update img's image!")
-        print("Press enter to close")
-        input()
-        exit()
+    tmp.close()
+    if abs(img_x - tmp_img_x) > 15 or abs(img_y - tmp_img_y) > 7: #img_x != tmp_img_x or img_y != tmp_img_y:
+        get_windows(yys_window_name,tempimg_name)
+        tmp = Image.open('./123.png')
+        tmp_img_x,tmp_img_y = tmp.size
+        tmp.close()
+        if abs(img_x - tmp_img_x) > 15 or abs(img_y - tmp_img_y) > 7:
+            print("please update img's image!")
+            print("Press enter to close")
+            input()
+            exit()
 
 # 获取阴阳师运行状态
 def get_windows(windowsname,filename):
@@ -51,11 +59,10 @@ def get_windows(windowsname,filename):
         img = Image.open("img/room_wait.png")
         tmp_img_x,tmp_img_y = img.size
         
-        print('get window data...')
         # 获取窗口句柄
         print(win32gui.EnumWindows)
         yys_handle = win32gui.FindWindow(None,windowsname)
-        print("get window hanlde")
+
         # time.sleep(0.3)
         # pythoncom.CoInitialize()
         # shell = win32com.client.Dispatch("WScript.Shell")
@@ -67,21 +74,22 @@ def get_windows(windowsname,filename):
         # shell = win32com.client.Dispatch("WScript.Shell")
         # shell.SendKeys('%')
         
+        # win32gui.EnumWindows
         # 获取窗口DC
-        #win32gui.EnumWindows
         yys_hdDC = win32gui.GetWindowDC(yys_handle)
         print("get window DC")
         
         # 获取窗口的位置信息
         left, top, right, bottom = win32gui.GetWindowRect(yys_handle)
         print(left, top, right, bottom,tmp_img_x,tmp_img_y)
+        print()
         if left < 0 or top < 0:
             print("\a请把阴阳师窗口打开至桌面（不能最小化）")
         # 窗口长宽
         width = right - left
         height = bottom - top
-        print()
-        if width != tmp_img_x or tmp_img_y != height:
+        #if width != tmp_img_x or tmp_img_y != height:
+        if abs(width - tmp_img_x) > 15 or abs(height - tmp_img_y) > 7:
             # 将窗口放在前台，并激活该窗口（窗口不能最小化）
             #win32gui.SetForegroundWindow(yys_handle)
 
@@ -93,7 +101,18 @@ def get_windows(windowsname,filename):
             # 参数5：长度
             # 参数6：宽度
             win32gui.SetWindowPos(yys_handle, win32con.HWND_NOTOPMOST, 0, 0, tmp_img_x, tmp_img_y, win32con.SWP_SHOWWINDOW)#win32con.SWP_NOACTIVATE|win32con.SWP_SHOWWINDOW)
-        
+            time.sleep(0.5)
+            # 获取窗口的位置信息
+            left, top, right, bottom = win32gui.GetWindowRect(yys_handle)
+            print(left, top, right, bottom,tmp_img_x,tmp_img_y)
+            print()
+            # 窗口长宽
+            width = right - left
+            height = bottom - top
+            if abs(width - tmp_img_x) > 15 or abs(height - tmp_img_y) > 7:
+                win32gui.SetWindowPos(yys_handle, win32con.HWND_NOTOPMOST, 0, 0, tmp_img_x, tmp_img_y, win32con.SWP_SHOWWINDOW)#win32con.SWP_NOACTIVATE|win32con.SWP_SHOWWINDOW)
+                time.sleep(0.5)
+
         # 根据句柄创建一个DC
         newhdDC = win32ui.CreateDCFromHandle(yys_hdDC)
         # 创建一个兼容设备内存的DC

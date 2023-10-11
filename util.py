@@ -23,7 +23,7 @@ def rand_num(x, y):
  
 def get_system_dpi():
     """获取缩放后的分辨率"""
-    hdc = win32gui.GetDC(0)
+    hdc = win32gui.GetDC(win32gui.FindWindow(None,"阴阳师-网易游戏"))
     x_dpi: int = win32print.GetDeviceCaps(hdc, win32con.LOGPIXELSX)
     # y_dpi = win32print.GetDeviceCaps(hdc, win32con.LOGPIXELSY)
     screen_scale_rate=x_dpi/96
@@ -95,7 +95,7 @@ def get_windows(windowsname,filename):
             win32gui.SetWindowPos(yys_handle, win32con.HWND_NOTOPMOST, 0, 0, tmp_img_x, tmp_img_y, win32con.SWP_SHOWWINDOW)#win32con.SWP_NOACTIVATE|win32con.SWP_SHOWWINDOW)
         
         # 根据句柄创建一个DC
-        newhdDC = win32ui.CreateDCFromHandle(yys_hdDC)
+        newhdDC = win32ui.CreateDCFromHandle(yys_handle)
         # 创建一个兼容设备内存的DC
         saveDC = newhdDC.CreateCompatibleDC()
         # 创建bitmap保存图片

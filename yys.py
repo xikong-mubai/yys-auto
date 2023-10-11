@@ -249,6 +249,10 @@ def yuling():
 print("请稍等，正在加载资源......")
 
 if is_admin():
+    #ctypes.windll.shcore.SetProcessDpiAwareness(2)
+    #yys_path = input("请输入阴阳师程序路径：")
+    #os.system(yys_path)
+    
     while True:
         help()
         flag = input('请选择模式：')

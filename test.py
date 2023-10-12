@@ -18,9 +18,9 @@ if f: # Vista & 7 stuff
       ctypes.sizeof(rect)
       )
     size = (rect.right - rect.left, rect.bottom - rect.top)        
+    print(dir(rect))
 else:      
     size = (1)
-print(win32gui.FindWindow(None,'阴阳师-网易游戏'))
 print(size)
 print(rect.right , rect.left, rect.bottom , rect.top) 
 

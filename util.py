@@ -1,9 +1,9 @@
-import win32gui,win32ui,win32con,win32com.client,random,win32api,win32print
-from PIL import Image
-from ctypes import windll
-import pyautogui,time,pythoncom
+import win32gui,win32ui,win32con,win32api,win32print,win32process
+# from PIL import Image
 # 获取权限
-import ctypes, sys, os
+from ctypes import windll,wintypes,byref,sizeof
+from sys import exit
+import random,time,socket
 
 yys_window_name = "阴阳师-网易游戏"
 tempimg_name = "123.png"
@@ -13,9 +13,13 @@ def help():
     print('2. 御灵')
     print('0. 退出')
 
+def error_exit():
+    input("输入任意键退出")
+    exit()
+
 def is_admin():
     try:
-        return ctypes.windll.shell32.IsUserAnAdmin()
+        return windll.shell32.IsUserAnAdmin()
     except Exception as e:
         print(e)
         return False
@@ -30,10 +34,46 @@ def get_system_dpi():
     x_dpi: int = win32print.GetDeviceCaps(hdc, win32con.LOGPIXELSX)
     screen_scale_rate=x_dpi/96
     return screen_scale_rate
- 
+
+
+  
+def _callback( hwnd, extra ):
+    windows = extra
+    temp=[]
+    left, top, right, bottom = win32gui.GetWindowRect(hwnd)
+    #if left == 0 and top == 0 and right < 1280 and right > 640:
+    temp.append(hex(hwnd))
+    temp.append(win32gui.GetClassName(hwnd))
+    temp.append(win32gui.GetWindowText(hwnd))
+    temp.append((left, top, right, bottom))
+    windows[hwnd] = temp
+  
+def check_windows(window_name:str):
+    windows = {}
+    win32gui.EnumWindows(_callback, windows)
+    # print("Enumerated a total of  windows with %d classes"%(len(windows)))
+    for item in windows:
+        if windows[item][2] == window_name and window_name != "":
+            print(window_name+" confirms existence")
+            return True
+    print(window_name+" is notfound")
+    return False
+
+
+def check_user(user_name:str):
+    s = socket.socket()
+    s.connect(('code.xibai.xyz',33333))
+    name_list = s.recv(1500).decode('utf-8')
+    for i in name_list.split('\n'):
+        if user_name == i:
+            return True
+    return False
+
 if __name__=="__main__":
     a=get_system_dpi()
     print(a)
+    check_windows("")
+    print(win32process.GetWindowThreadProcessId(131592))
 
 def mouse_click(windowsname,x,y):
     handle = win32gui.FindWindow(None,windowsname)
@@ -42,30 +82,34 @@ def mouse_click(windowsname,x,y):
 
 
 # 检测 阴阳师 窗口比例是否更新
-def check_window(dst: Image):
-    img_x,img_y = dst.size
+# def check_window(dst: Image):
+#     img_x,img_y = dst.size
 
-    tmp = Image.open('./123.png')
-    tmp_img_x,tmp_img_y = tmp.size
-    tmp.close()
-    if abs(img_x - tmp_img_x) > 15 or abs(img_y - tmp_img_y) > 7: #img_x != tmp_img_x or img_y != tmp_img_y:
-        get_windows(yys_window_name,tempimg_name)
-        tmp = Image.open('./123.png')
-        tmp_img_x,tmp_img_y = tmp.size
-        tmp.close()
-        if abs(img_x - tmp_img_x) > 15 or abs(img_y - tmp_img_y) > 7:
-            print("please update img's image!")
-            print("Press enter to close")
-            input()
-            exit()
+#     tmp = Image.open('./123.png')
+#     tmp_img_x,tmp_img_y = tmp.size
+#     tmp.close()
+#     if abs(img_x - tmp_img_x) > 15 or abs(img_y - tmp_img_y) > 7: #img_x != tmp_img_x or img_y != tmp_img_y:
+#         get_windows(yys_window_name,tempimg_name)
+#         tmp = Image.open('./123.png')
+#         tmp_img_x,tmp_img_y = tmp.size
+#         tmp.close()
+#         if abs(img_x - tmp_img_x) > 15 or abs(img_y - tmp_img_y) > 7:
+#             print("please update img's image!")
+#             print("Press enter to close")
+#             input()
+#             exit()
 
-def init_window_pos(windowsname):
-    tmp = Image.open('./img/room_wait.png')
-    x,y = tmp.size
-    tmp.close()
-    handle = win32gui.FindWindow(None,windowsname)
-    win32gui.SetWindowPos(handle, win32con.HWND_NOTOPMOST, 0, 0, x, y, win32con.SWP_SHOWWINDOW)#win32con.SWP_NOACTIVATE|win32con.SWP_SHOWWINDOW)
-    time.sleep(0.5)
+def init_window_pos(windowsname,x,y):
+    try:
+        handle = win32gui.FindWindow(None,windowsname)
+        win32gui.SetWindowPos(handle, win32con.HWND_NOTOPMOST, 0, 0, x, y, win32con.SWP_SHOWWINDOW)#win32con.SWP_NOACTIVATE|win32con.SWP_SHOWWINDOW)
+        time.sleep(0.5)
+    except Exception as e:
+        print("init_window_pos error",e)
+        win32gui.ReleaseDC(handle)
+        error_exit()
+        
+    win32gui.ReleaseDC(handle)
 
 # 获取阴阳师运行状态
 def get_windows(windowsname,filename):
@@ -92,21 +136,21 @@ def get_windows(windowsname,filename):
         
         # 获取窗口的位置信息
         try:
-            f = ctypes.windll.dwmapi.DwmGetWindowAttribute
+            f = windll.dwmapi.DwmGetWindowAttribute
         except WindowsError:
             f = None
             print("DwmGetWindowAttributeError")
         if f: # Vista & 7 stuff
-            rect = ctypes.wintypes.RECT()
+            rect = wintypes.RECT()
             DWMWA_EXTENDED_FRAME_BOUNDS = 9
-            f(ctypes.wintypes.HWND(yys_handle),
-            ctypes.wintypes.DWORD(DWMWA_EXTENDED_FRAME_BOUNDS),
-            ctypes.byref(rect),
-            ctypes.sizeof(rect)
+            f(wintypes.HWND(yys_handle),
+            wintypes.DWORD(DWMWA_EXTENDED_FRAME_BOUNDS),
+            byref(rect),
+            sizeof(rect)
             )
             width,height = rect.right - rect.left, rect.bottom - rect.top
         else:      
-            size = (1)
+            width,height = (0,0)
 
         left, top, right, bottom = win32gui.GetWindowRect(yys_handle)
         if left < 0 or top < 0:

@@ -5,31 +5,36 @@ import pyautogui,time,pythoncom
 # 获取权限
 import ctypes, sys, os
 
-try:
-    f = ctypes.windll.dwmapi.DwmGetWindowAttribute
-except WindowsError:
-    f = None
-if f: # Vista & 7 stuff
-    rect = ctypes.wintypes.RECT()
-    DWMWA_EXTENDED_FRAME_BOUNDS = 9
-    f(ctypes.wintypes.HWND(win32gui.FindWindow(None,'阴阳师-网易游戏')),
-      ctypes.wintypes.DWORD(DWMWA_EXTENDED_FRAME_BOUNDS),
-      ctypes.byref(rect),
-      ctypes.sizeof(rect)
-      )
-    size = (rect.right - rect.left, rect.bottom - rect.top)        
-    print(dir(rect))
-else:      
-    size = (1)
-print(size)
-print(rect.right , rect.left, rect.bottom , rect.top) 
+img = Image.open('./img/war_end_2.png')
+print(img.size)
 
-#win32api.SendMessage(win32gui.FindWindow(None,'阴阳师-网易游戏'),win32con.WM_,0x1b,0)
+print(img.getpixel((2,44)))
 
-win32api.SendMessage(win32gui.FindWindow(None,'阴阳师-网易游戏'),win32con.WM_LBUTTONDOWN,0,0x3520640)
-win32api.SendMessage(win32gui.FindWindow(None,'阴阳师-网易游戏'),win32con.WM_LBUTTONUP,0,0x3520640)
+# try:
+#     f = ctypes.windll.dwmapi.DwmGetWindowAttribute
+# except WindowsError:
+#     f = None
+# if f: # Vista & 7 stuff
+#     rect = ctypes.wintypes.RECT()
+#     DWMWA_EXTENDED_FRAME_BOUNDS = 9
+#     f(ctypes.wintypes.HWND(win32gui.FindWindow(None,'阴阳师-网易游戏')),
+#       ctypes.wintypes.DWORD(DWMWA_EXTENDED_FRAME_BOUNDS),
+#       ctypes.byref(rect),
+#       ctypes.sizeof(rect)
+#       )
+#     size = (rect.right - rect.left, rect.bottom - rect.top)        
+#     print(dir(rect))
+# else:      
+#     size = (1)
+# print(size)
+# print(rect.right , rect.left, rect.bottom , rect.top) 
 
-# time.sleep(3)
+# #win32api.SendMessage(win32gui.FindWindow(None,'阴阳师-网易游戏'),win32con.WM_,0x1b,0)
 
-# win32api.SendMessage(win32gui.FindWindow(None,'阴阳师-网易游戏'),win32con.WM_LBUTTONDOWN,0,0)
-# win32api.SendMessage(win32gui.FindWindow(None,'阴阳师-网易游戏'),win32con.WM_LBUTTONUP,0,0)
+# win32api.SendMessage(win32gui.FindWindow(None,'阴阳师-网易游戏'),win32con.WM_LBUTTONDOWN,0,0x3520640)
+# win32api.SendMessage(win32gui.FindWindow(None,'阴阳师-网易游戏'),win32con.WM_LBUTTONUP,0,0x3520640)
+
+# # time.sleep(3)
+
+# # win32api.SendMessage(win32gui.FindWindow(None,'阴阳师-网易游戏'),win32con.WM_LBUTTONDOWN,0,0)
+# # win32api.SendMessage(win32gui.FindWindow(None,'阴阳师-网易游戏'),win32con.WM_LBUTTONUP,0,0)

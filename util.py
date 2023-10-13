@@ -106,10 +106,7 @@ def init_window_pos(windowsname,x,y):
         time.sleep(0.5)
     except Exception as e:
         print("init_window_pos error",e)
-        win32gui.ReleaseDC(handle)
         error_exit()
-        
-    win32gui.ReleaseDC(handle)
 
 # 获取阴阳师运行状态
 def get_windows(windowsname,filename):

@@ -314,7 +314,7 @@ if is_admin():
         #elif flag == '2':
         #    yuling()
         elif flag == '0':
-            exit(0)
+            error_exit()
         else:
             print('对叭起, 我不认识它QAQ')
 else:

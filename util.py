@@ -30,11 +30,15 @@ def rand_num(x:int, y:int):
  
 def get_system_dpi():
     """获取缩放后的分辨率"""
+    windll.shcore.SetProcessDpiAwareness(1)
+    a = wintypes.DWORD()
+    windll.shcore.GetProcessDpiAwareness(win32gui.GetDC(win32gui.FindWindow(None,"阴阳师-网易游戏")),byref(a))
+    print(a)
     hdc = win32gui.GetDC(win32gui.FindWindow(None,"阴阳师-网易游戏"))
     x_dpi: int = win32print.GetDeviceCaps(hdc, win32con.LOGPIXELSX)
-    screen_scale_rate=x_dpi/96
+    print(win32print.GetDeviceCaps(hdc, win32con.DESKTOPHORZRES) / win32print.GetDeviceCaps(hdc, win32con.HORZRES))
+    screen_scale_rate=x_dpi#/96
     return screen_scale_rate
-
 
   
 def _callback( hwnd, extra ):
@@ -69,11 +73,21 @@ def check_user(user_name:str):
             return True
     return False
 
+def init_window_pos(windowsname,x,y):
+    try:
+        handle = win32gui.FindWindow(None,windowsname)
+        win32gui.SetWindowPos(handle, win32con.HWND_NOTOPMOST, 0, 0, x, y, win32con.SWP_SHOWWINDOW)#win32con.SWP_NOACTIVATE|win32con.SWP_SHOWWINDOW)
+        time.sleep(0.5)
+    except Exception as e:
+        print("init_window_pos error",e)
+        error_exit()
+
 if __name__=="__main__":
     a=get_system_dpi()
     print(a)
     check_windows("")
     print(win32process.GetWindowThreadProcessId(131592))
+    #init_window_pos(yys_window_name,1180,702)
 
 def mouse_click(windowsname,x,y):
     handle = win32gui.FindWindow(None,windowsname)
@@ -99,14 +113,7 @@ def mouse_click(windowsname,x,y):
 #             input()
 #             exit()
 
-def init_window_pos(windowsname,x,y):
-    try:
-        handle = win32gui.FindWindow(None,windowsname)
-        win32gui.SetWindowPos(handle, win32con.HWND_NOTOPMOST, 0, 0, x, y, win32con.SWP_SHOWWINDOW)#win32con.SWP_NOACTIVATE|win32con.SWP_SHOWWINDOW)
-        time.sleep(0.5)
-    except Exception as e:
-        print("init_window_pos error",e)
-        error_exit()
+
 
 # 获取阴阳师运行状态
 def get_windows(windowsname,filename):
@@ -145,11 +152,13 @@ def get_windows(windowsname,filename):
             byref(rect),
             sizeof(rect)
             )
-            width,height = rect.right - rect.left, rect.bottom - rect.top
+            width,height = rect.right - rect.left, rect.bottom - rect.top - 45
         else:      
             width,height = (0,0)
 
         left, top, right, bottom = win32gui.GetWindowRect(yys_handle)
+        print(rect.left, rect.top,rect.right , rect.bottom)
+        print(left, top, right, bottom)
         if left < 0 or top < 0:
             print("\a请把目标窗口打开至桌面（不能最小化）")
         # 窗口长宽
@@ -191,7 +200,7 @@ def get_windows(windowsname,filename):
         saveBitmap.CreateCompatibleBitmap(newhdDC, width, height)
         saveDC.SelectObject(saveBitmap)
         time.sleep(0.3)
-        saveDC.BitBlt((0, 0), (width, height), newhdDC, (rect.left,rect.top), win32con.SRCCOPY)#(left, top), win32con.SRCCOPY)
+        saveDC.BitBlt((0, 0), (width, height), newhdDC, (rect.left,rect.top+45), win32con.SRCCOPY)#(left, top), win32con.SRCCOPY)
         time.sleep(0.3)
         saveBitmap.SaveBitmapFile(saveDC, filename)
         win32gui.DeleteObject(saveBitmap.GetHandle())

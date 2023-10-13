@@ -265,30 +265,6 @@ def yuling():
 print("请稍等，正在加载资源......")
 
 if is_admin():
-    #ctypes.windll.shcore.SetProcessDpiAwareness(2)
-    #yys_path = input("请输入阴阳师程序路径：")
-    #os.system(yys_path)
-    config_file = open('./config','a+',encoding='utf-8')
-    config_file.seek(0)
-    yys_name = config_file.read()
-    if len(yys_name) != 0:
-        flag = input("请确认 "+yys_name+" 是否为你的阴阳师昵称（y/n）：")
-        if flag.lower() == 'y':
-            pass
-        elif flag.lower() == 'n':
-            yys_name = input("请输入阴阳师用户名称：")
-        else:
-            print('请输入 y 或者 n。')
-            config_file.close()
-            error_exit()
-    else:
-        yys_name = input("请输入阴阳师用户名称：")
-    config_file.truncate(0)
-    config_file.write(yys_name)
-    config_file.close()
-    if not check_user(yys_name):
-        error_exit()
-    
     # 为空会获取到资源管理器的子窗口pid（空窗口）
     yys_window_name = input("请输入目标窗口名称：")
     if not check_windows(yys_window_name):
@@ -305,6 +281,31 @@ if is_admin():
     print("初始化窗口位置...")
     init_window_pos(yys_window_name,img_x,img_y)
     print("初始化窗口完成")
+
+    #ctypes.windll.shcore.SetProcessDpiAwareness(2)
+    #yys_path = input("请输入阴阳师程序路径：")
+    #os.system(yys_path)
+    config_file = open('./config','a+',encoding='utf-8')
+    config_file.seek(0)
+    yys_name = config_file.read()
+    if len(yys_name) != 0:
+        flag = input("请确认 "+yys_name+" 是否为你的阴阳师昵称（y/n）：")
+        if flag.lower() == 'y':
+            pass
+        elif flag.lower() == 'n':
+            yys_name = input("请手动输入阴阳师用户名称：")
+        else:
+            print('请输入 y 或者 n。')
+            config_file.close()
+            error_exit()
+    else:
+        yys_name = input("请手动输入阴阳师用户名称：")
+    config_file.truncate(0)
+    config_file.write(yys_name)
+    config_file.close()
+    if not check_user(yys_name):
+        error_exit()
+    
     while True:
         help()
         flag = input('请选择模式：')

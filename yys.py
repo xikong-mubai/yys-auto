@@ -1,9 +1,10 @@
-import win32gui,win32ui,win32con,win32com.client,random
 from PIL import Image
-import pyautogui,time,pythoncom
+import pyautogui
 # 获取权限
-import ctypes, sys, os
-from util import *
+# from ctypes import windll
+from sys import version_info,executable
+from util import time,windll,get_windows,rand_num,mouse_click,tempimg_name,yys_window_name,init_window_pos,is_admin, \
+help ,check_windows,check_user,error_exit
 
 # 挖土
 def watu():
@@ -99,8 +100,6 @@ def watu():
                 pixel_sum[1] += abs(tmp_pixel[1] - war2_pixel[1])
                 pixel_sum[2] += abs(tmp_pixel[2] - war2_pixel[2])
 
-            tmp_img.close()
-
             if abs(pixel_sum[0] / 9) < 10 and abs(pixel_sum[1] / 9) < 10 and abs(pixel_sum[2] / 10) < 10:
                 # pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)), clicks=1, interval=rand_num(1,4), button='left', duration=rand_num(1,3), tween=pyautogui.linear)
                 x=rand_num(int(0.9 * img_x),int(0.98 * img_x))
@@ -127,8 +126,15 @@ def watu():
             #     pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)))
             #     time.sleep(0.3)
             
+            tmp_img.close()
+        
         print('\r这是第'+str(num)+'次')
 
+    room_img.close()
+    room_member_img.close()
+    war1_img.close()
+    war2_img.close()
+    defeat_img.close()
     print("已结束！")
     print("刷了"+str(num)+"次")
     print()
@@ -262,23 +268,57 @@ if is_admin():
     #ctypes.windll.shcore.SetProcessDpiAwareness(2)
     #yys_path = input("请输入阴阳师程序路径：")
     #os.system(yys_path)
-    #yys_window_name = input("请输入目标窗口名称：")
-    init_window_pos(yys_window_name)
-    print()
+    config_file = open('./config','a+',encoding='utf-8')
+    config_file.seek(0)
+    yys_name = config_file.read()
+    if len(yys_name) != 0:
+        flag = input("请确认 "+yys_name+" 是否为你的阴阳师昵称（y/n）：")
+        if flag.lower() == 'y':
+            pass
+        elif flag.lower() == 'n':
+            yys_name = input("请输入阴阳师用户名称：")
+        else:
+            print('请输入 y 或者 n。')
+            config_file.close()
+            error_exit()
+    else:
+        yys_name = input("请输入阴阳师用户名称：")
+    config_file.truncate(0)
+    config_file.write(yys_name)
+    config_file.close()
+    if not check_user(yys_name):
+        error_exit()
+    
+    # 为空会获取到资源管理器的子窗口pid（空窗口）
+    yys_window_name = input("请输入目标窗口名称：")
+    if not check_windows(yys_window_name):
+        error_exit()
+    print("获取初始图像尺寸：",end='')
+    try:
+        room_img = Image.open('./img/room_wait.png')
+        img_x,img_y = room_img.size
+        print(img_x,img_y)
+        room_img.close()
+    except Exception as e:
+        print("获取图像失败",e)
+        error_exit()
+    print("初始化窗口位置...")
+    init_window_pos(yys_window_name,img_x,img_y)
+    print("初始化窗口完成")
     while True:
         help()
         flag = input('请选择模式：')
         if flag == '1':
             watu()
-        elif flag == '2':
-            yuling()
+        #elif flag == '2':
+        #    yuling()
         elif flag == '0':
             exit(0)
         else:
             print('对叭起, 我不认识它QAQ')
 else:
-    if sys.version_info[0] == 3:
-        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, __file__, None, 1)
-    else:  # in python2.x
-        ctypes.windll.shell32.ShellExecuteW(None, u"runas", unicode(sys.executable), unicode(__file__), None, 1)
-        pass
+    if version_info[0] == 3:
+        windll.shell32.ShellExecuteW(None, "runas", executable, __file__, None, 1)
+    # else:  # in python2.x
+    #     windll.shell32.ShellExecuteW(None, u"runas", unicode(executable), unicode(__file__), None, 1)
+    #     pass

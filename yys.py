@@ -4,7 +4,7 @@ import pyautogui
 # from ctypes import windll
 from sys import version_info,executable
 from util import time,windll,get_windows,rand_num,mouse_click,tempimg_name,yys_window_name,init_window_pos,is_admin, \
-help ,check_windows,check_user,error_exit
+help ,check_windows,check_user,error_exit,get_system_dpi
 
 # 挖土
 def watu():
@@ -262,6 +262,10 @@ def yuling():
     print("刷了"+str(num)+"次")
     print()
 
+
+#ctypes.windll.shcore.SetProcessDpiAwareness(2)
+#yys_path = input("请输入阴阳师程序路径：")
+#os.system(yys_path)
 print("请稍等，正在加载资源......")
 
 if is_admin():
@@ -269,22 +273,32 @@ if is_admin():
     yys_window_name = input("请输入目标窗口名称：")
     if not check_windows(yys_window_name):
         error_exit()
-    print("获取初始图像尺寸：",end='')
-    try:
-        room_img = Image.open('./img/room_wait.png')
-        img_x,img_y = room_img.size
-        print(img_x,img_y)
-        room_img.close()
-    except Exception as e:
-        print("获取图像失败",e)
-        error_exit()
+
+    print("当前目标窗口dpi及其dpi感知级别：",end='')
+    dpi,a = get_system_dpi(yys_window_name)
+    print(dpi,a)
+    print("当前窗口dpi及其dpi感知级别：",end='')
+    dpi,a = get_system_dpi('')
+    print(dpi,a)
+
+    # img_x,img_y = 1180,702
+    # img_x,img_y = img_x + int(22/dpi),img_y + int((45+2+10)/dpi)# 769 462 # dpi为 1.5 时，等比放大后即为 1131 636
+    img_x,img_y = 754,424 # 预设画面宽高
+    if a == -1 or a == 0:
+        chang_x,chang_y = 22/dpi,57/dpi
+        img_x += int(chang_x)
+        img_x = img_x + 1 if chang_x - int(chang_x) > 0 else img_x
+        img_y += int(chang_y)
+        img_y = img_y + 1 if chang_y - int(chang_y) > 0 else img_y  
+    else:
+        img_x += 22
+        img_y += 57
+
+    print("预设窗口宽高为：",img_x,img_y)
     print("初始化窗口位置...")
     init_window_pos(yys_window_name,img_x,img_y)
     print("初始化窗口完成")
 
-    #ctypes.windll.shcore.SetProcessDpiAwareness(2)
-    #yys_path = input("请输入阴阳师程序路径：")
-    #os.system(yys_path)
     config_file = open('./config','a+',encoding='utf-8')
     config_file.seek(0)
     yys_name = config_file.read()

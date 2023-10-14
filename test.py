@@ -1,14 +1,43 @@
-import win32gui,win32ui,win32con,win32com.client,random,win32api,win32print
-from PIL import Image
+# import win32gui,win32ui,win32con,win32api,win32print,win32process
+# # from PIL import Image
+# # 获取权限
+# from ctypes import windll,wintypes,byref,sizeof
+# from sys import exit
+# import random,time,socket
+
+import win32gui,win32ui,win32con,win32api,win32print,win32process
+#from PIL import Image
 from ctypes import windll
-import pyautogui,time,pythoncom
+#import pyautogui,time
 # 获取权限
-import ctypes, sys, os
+#import random
 
-img = Image.open('./img/war_end_2.png')
-print(img.size)
+from util import mouse_click,rand_num,get_system_dpi,check_windows
 
-print(img.getpixel((2,44)))
+yys_window_name = "阴阳师-网易游戏"
+tempimg_name = "123.png"
+
+if __name__=="__main__":
+    windll.shcore.SetProcessDpiAwareness(0)
+    a=get_system_dpi('')
+    print(a)
+    check_windows("")
+    #print(win32process.GetWindowThreadProcessId(131592))
+    #init_window_pos(yys_window_name,1180,702)
+    #init_window_pos(yys_window_name,753,462)
+
+    # x=rand_num(int(0.87 * img_x),int(0.93 * img_x))
+    # y=rand_num(int(0.85 * img_y),int(0.93 * img_y))
+    # mouse_click(yys_window_name,x,y)
+
+    handle = win32gui.FindWindow(None,"阴阳师-网易游戏")
+
+    # x,y = 720,440
+    # x,y = 1070,625
+    x,y = 730,400
+    print("dianji")
+    win32api.SendMessage(handle,win32con.WM_LBUTTONDOWN,0,(y << 16)+x)
+    win32api.SendMessage(handle,win32con.WM_LBUTTONUP,0,(y << 16)+x)
 
 # try:
 #     f = ctypes.windll.dwmapi.DwmGetWindowAttribute

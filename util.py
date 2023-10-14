@@ -28,19 +28,26 @@ def is_admin():
 def rand_num(x:int, y:int):
     return round(random.randint(x, y),3)
  
-def get_system_dpi():
+def get_system_dpi(window_name):
     """获取缩放后的分辨率"""
-    windll.shcore.SetProcessDpiAwareness(1)
+    #windll.shcore.SetProcessDpiAwareness(0)
+    if window_name == '':
+        hdwn = 0
+    else:
+        hdwn = win32gui.FindWindow(None,window_name)
+    hdc = win32gui.GetDC(hdwn)
     a = wintypes.DWORD()
-    windll.shcore.GetProcessDpiAwareness(win32gui.GetDC(win32gui.FindWindow(None,"阴阳师-网易游戏")),byref(a))
-    print(a)
-    hdc = win32gui.GetDC(win32gui.FindWindow(None,"阴阳师-网易游戏"))
-    x_dpi: int = win32print.GetDeviceCaps(hdc, win32con.LOGPIXELSX)
-    print(win32print.GetDeviceCaps(hdc, win32con.DESKTOPHORZRES) / win32print.GetDeviceCaps(hdc, win32con.HORZRES))
-    screen_scale_rate=x_dpi#/96
-    return screen_scale_rate
+    windll.shcore.GetProcessDpiAwareness(hdwn,byref(a))
+    if a.value == 0:
+        dpi = win32print.GetDeviceCaps(hdc, win32con.DESKTOPHORZRES) / win32print.GetDeviceCaps(hdc, win32con.HORZRES)
+    else:
+        x_dpi: int = win32print.GetDeviceCaps(hdc, win32con.LOGPIXELSX)
+        dpi = x_dpi / 96
+    #screen_scale_rate=x_dpi#/96
+    
+    a = -1 if a.value == 4294967295 else a.value
+    return dpi,a
 
-  
 def _callback( hwnd, extra ):
     windows = extra
     temp=[]
@@ -83,17 +90,17 @@ def init_window_pos(windowsname,x,y):
         error_exit()
 
 if __name__=="__main__":
-    a=get_system_dpi()
+    a=get_system_dpi('')
     print(a)
     check_windows("")
-    print(win32process.GetWindowThreadProcessId(131592))
+    #print(win32process.GetWindowThreadProcessId(131592))
     #init_window_pos(yys_window_name,1180,702)
+    #init_window_pos(yys_window_name,753,462)
 
 def mouse_click(windowsname,x,y):
     handle = win32gui.FindWindow(None,windowsname)
     win32api.SendMessage(handle,win32con.WM_LBUTTONDOWN,0,(y << 16)+x)
     win32api.SendMessage(handle,win32con.WM_LBUTTONUP,0,(y << 16)+x)
-
 
 # 检测 阴阳师 窗口比例是否更新
 # def check_window(dst: Image):
@@ -152,7 +159,7 @@ def get_windows(windowsname,filename):
             byref(rect),
             sizeof(rect)
             )
-            width,height = rect.right - rect.left, rect.bottom - rect.top - 45
+            width,height = rect.right - rect.left - 2, rect.bottom - rect.top - 45 - 2
         else:      
             width,height = (0,0)
 
@@ -200,7 +207,7 @@ def get_windows(windowsname,filename):
         saveBitmap.CreateCompatibleBitmap(newhdDC, width, height)
         saveDC.SelectObject(saveBitmap)
         time.sleep(0.3)
-        saveDC.BitBlt((0, 0), (width, height), newhdDC, (rect.left,rect.top+45), win32con.SRCCOPY)#(left, top), win32con.SRCCOPY)
+        saveDC.BitBlt((0, 0), (width, height), newhdDC, (rect.left+1,rect.top+45+1), win32con.SRCCOPY)#(left, top), win32con.SRCCOPY)
         time.sleep(0.3)
         saveBitmap.SaveBitmapFile(saveDC, filename)
         win32gui.DeleteObject(saveBitmap.GetHandle())

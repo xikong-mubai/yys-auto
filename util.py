@@ -64,7 +64,7 @@ def check_windows(window_name:str):
     win32gui.EnumWindows(_callback, windows)
     # print("Enumerated a total of  windows with %d classes"%(len(windows)))
     for item in windows:
-        if windows[item][2] == window_name and window_name != "":
+        if window_name == windows[item][2] and window_name != "":
             print(window_name+" confirms existence")
             return True
     print(window_name+" is notfound")
@@ -92,16 +92,19 @@ def init_window_pos(windowsname,x,y):
 if __name__=="__main__":
     a=get_system_dpi('')
     print(a)
-    check_windows("")
+    check_windows("阴阳师")
     #print(win32process.GetWindowThreadProcessId(131592))
-    #init_window_pos(yys_window_name,1180,702)
-    #init_window_pos(yys_window_name,753,462)
 
 def mouse_click(windowsname,x,y):
-    handle = win32gui.FindWindow(None,windowsname)
-    win32api.SendMessage(handle,win32con.WM_LBUTTONDOWN,0,(y << 16)+x)
-    win32api.SendMessage(handle,win32con.WM_LBUTTONUP,0,(y << 16)+x)
+    print("点击位置：",x,y)
+    try:
+        handle = win32gui.FindWindow(None,windowsname)
+        win32api.SendMessage(handle,win32con.WM_LBUTTONDOWN,0,(y << 16)+x)
+        win32api.SendMessage(handle,win32con.WM_LBUTTONUP,0,(y << 16)+x)
+    except Exception as e:
+        print(e)
 
+    time.sleep(0.1)
 # 检测 阴阳师 窗口比例是否更新
 # def check_window(dst: Image):
 #     img_x,img_y = dst.size
@@ -123,12 +126,8 @@ def mouse_click(windowsname,x,y):
 
 
 # 获取阴阳师运行状态
-def get_windows(windowsname,filename):
+def get_windows(windowsname,filename,flag):
     try:
-        # img = Image.open("img/room_wait.png")
-        # tmp_img_x,tmp_img_y = img.size
-        # 获取窗口句柄
-        # print(win32gui.EnumWindows)
         yys_handle = win32gui.FindWindow(None,windowsname)
 
         # time.sleep(0.3)
@@ -164,8 +163,9 @@ def get_windows(windowsname,filename):
             width,height = (0,0)
 
         left, top, right, bottom = win32gui.GetWindowRect(yys_handle)
-        print(rect.left, rect.top,rect.right , rect.bottom)
-        print(left, top, right, bottom)
+        if flag % 2 == 1:
+            print("实际屏幕显示位置",rect.left, rect.top,rect.right , rect.bottom)
+            print("系统记录位置",left, top, right, bottom)
         if left < 0 or top < 0:
             print("\a请把目标窗口打开至桌面（不能最小化）")
         # 窗口长宽

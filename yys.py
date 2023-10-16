@@ -5,6 +5,12 @@ from sys import version_info,executable
 from util import time,windll,get_windows,rand_num,mouse_click,tempimg_name,yys_window_name,init_window_pos,is_admin, \
 help ,check_windows,check_user,error_exit,get_system_dpi
 
+def click(dpi,level,x,y):
+    if level > 0:
+        x *= dpi
+        y *= dpi
+    mouse_click(yys_window_name,int(x),int(y))
+
 # 挖土
 def watu():
     get_windows(yys_window_name,tempimg_name,flag)

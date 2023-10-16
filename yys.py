@@ -1,14 +1,12 @@
-from PIL import Image
 # 获取权限
 # from ctypes import windll
 from sys import version_info,executable
-from util import time,windll,get_windows,rand_num,mouse_click,tempimg_name,yys_window_name,init_window_pos,is_admin, \
-help ,check_windows,check_user,error_exit,get_system_dpi
+from util import sleep,windll,get_windows,rand_num,mouse_click,tempimg_name,yys_window_name,init_window_pos,is_admin, \
+help ,check_windows,check_user,error_exit,get_system_dpi,Image
 
 # 挖土
 def watu():
-    get_windows(yys_window_name,tempimg_name,flag)
-    #get_windows('readme.txt - 记事本','123.png')
+    
     num = 0 ; result_flag = 0
     watu_num = eval(input("准备刷多少次？"))
     print()
@@ -42,7 +40,7 @@ def watu():
     war2_x_right = int(0.9893*img_x)
 
 
-    tmp_img = Image.open('./123.png')
+    tmp_img = get_windows(yys_window_name,flag)
     real_img_x,real_img_y = tmp_img.size
     tmp_img.close()
     real_wait_y = int(0.8 * real_img_y)
@@ -62,12 +60,9 @@ def watu():
     # war2_x = int(0.33 * img_x)
     real_war2_x_right = int(0.9893*real_img_x)
 
-
     while num < watu_num:
         while True:
-            get_windows(yys_window_name,tempimg_name,flag)
-            tmp_img = Image.open('123.png')
-
+            tmp_img = get_windows(yys_window_name,flag)
             # 判断是否在房间状态
             pixel_sum = [0,0,0]
             img_pixel = []
@@ -95,15 +90,19 @@ def watu():
                 ]
                 if tmp_pixel[0] == tmp_pixel[1] and tmp_pixel[1] == tmp_pixel[2]:
                     print("\r等待成员中",end='')
+                    if flag & 2 == 2:
+                        tmp_img.save('./img/room_wait.png')
                 elif abs(wait_button_pixel[0]) < 5 and abs(wait_button_pixel[1]) < 5 and abs(wait_button_pixel[2]) < 5:
                     print("\r等待房主中",end='')
+                    if flag & 2 == 2:
+                        tmp_img.save('./img/room_wait_member_1.png')
                 else:
                     # 1480-1540 / 1579   762-820 / 887
                     x=rand_num(int(0.9373 * init_x),int(0.9653 * init_x))
                     y=rand_num(int(0.8791 * init_y),int(0.91446 * init_y))
                     mouse_click(yys_window_name,int(x),int(y))
                     print("\r开始")
-                    time.sleep(10)
+                    sleep(10)
             
             # 判断是否是结束一阶段
             pixel_sum = [0,0,0]
@@ -124,7 +123,9 @@ def watu():
                 y=rand_num(int(0.85 * init_y),int(0.93 * init_y))
                 mouse_click(yys_window_name,int(x),int(y))
                 print("\r结算画面一阶段")
-                time.sleep(0.3)
+                if flag & 2 == 2:
+                    tmp_img.save('./img/war_end_1.png')
+                sleep(0.3)
             
             # 判断是否是结束二阶段
             pixel_sum = [0,0,0]
@@ -145,10 +146,12 @@ def watu():
                 y=rand_num(int(0.85 * init_y),int(0.93 * init_y))
                 mouse_click(yys_window_name,int(x),int(y))
                 print("\r结算画面二阶段")
+                if flag & 2 == 2:
+                    tmp_img.save('./img/war_end_2.png')
                 if result_flag == 0:
                     result_flag = 1
                     num += 1
-                time.sleep(0.3)
+                sleep(0.3)
                 break
 
             # # 判断是否是 defeat
@@ -163,7 +166,7 @@ def watu():
             # if abs(pixel_sum[0] / 9) < 10 and abs(pixel_sum[1] / 9) < 10 and abs(pixel_sum[2] / 10) < 10:
             #     # pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)), clicks=1, interval=rand_num(1,4), button='left', duration=rand_num(1,3), tween=pyautogui.linear)
             #     pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)))
-            #     time.sleep(0.3)
+            #     sleep(0.3)
             
             tmp_img.close()
         
@@ -251,7 +254,7 @@ def watu():
 #             # pyautogui.click(x=rand_num(int(0.8987 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)), clicks=1, interval=rand_num(1,4), button='left', duration=rand_num(1,3), tween=pyautogui.linear)
 #             pyautogui.click(x=rand_num(int(0.872 * img_x),int(0.925 * img_x)), y=rand_num(int(0.85 * img_y),int(0.932 * img_y)))
 #             num += 1
-#             time.sleep(10)
+#             sleep(10)
         
 #         # 判断是否是结束一阶段
 #         pixel_sum = [0,0,0]
@@ -265,7 +268,7 @@ def watu():
 #         if abs(pixel_sum[0] / 9 < 10) and abs(pixel_sum[1] / 9) < 10 and abs(pixel_sum[2] / 10) < 10:
 #             # pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)), clicks=1, interval=rand_num(1,4), button='left', duration=rand_num(1,3), tween=pyautogui.linear)
 #             pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)))
-#             time.sleep(0.3)
+#             sleep(0.3)
         
 #         # 判断是否是结束二阶段
 #         pixel_sum = [0,0,0]
@@ -279,7 +282,7 @@ def watu():
 #         if abs(pixel_sum[0] / 9) < 10 and abs(pixel_sum[1] / 9) < 10 and abs(pixel_sum[2] / 10) < 10:
 #             # pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)), clicks=1, interval=rand_num(1,4), button='left', duration=rand_num(1,3), tween=pyautogui.linear)
 #             pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)))
-#             time.sleep(0.3)
+#             sleep(0.3)
         
 #         # 判断是否是 defeat
 #         pixel_sum = [0,0,0]
@@ -293,7 +296,7 @@ def watu():
 #         if abs(pixel_sum[0] / 9) < 10 and abs(pixel_sum[1] / 9) < 10 and abs(pixel_sum[2] / 10) < 10:
 #             # pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)), clicks=1, interval=rand_num(1,4), button='left', duration=rand_num(1,3), tween=pyautogui.linear)
 #             pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)))
-#             time.sleep(0.3)
+#             sleep(0.3)
 
 #         print('\r这是第'+str(num)+'次',end='')
     
@@ -375,7 +378,9 @@ if is_admin():
         #    yuling()
         elif choose == '0':
             error_exit()
-        elif choose == '5':
+        elif choose == "4":
+            flag |= 2
+        elif choose == '5':   # debug
             flag |= 1
         else:
             print('对叭起, 我不认识它QAQ')

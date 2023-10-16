@@ -1,10 +1,12 @@
 import win32gui,win32ui,win32con,win32api,win32print,win32process
-# from PIL import Image
+from PIL import Image
 # 获取权限
 from ctypes import windll,wintypes,byref,sizeof
 from sys import exit
-import random,time,socket
-import numpy
+import socket
+from time import sleep
+from random import randint
+from numpy import array
 
 yys_window_name = "阴阳师-网易游戏"
 tempimg_name = "123.png"
@@ -12,6 +14,8 @@ tempimg_name = "123.png"
 def help():
     print('1. 魂土')
     print('2. 御灵')
+    print('4. 御灵')
+    print('5. 输出')
     print('0. 退出')
 
 def error_exit():
@@ -27,7 +31,7 @@ def is_admin():
 
 # 生成随机数
 def rand_num(x:int, y:int):
-    return round(random.randint(x, y),3)
+    return round(randint(x, y),3)
  
 def get_system_dpi(window_name):
     """获取缩放后的分辨率"""
@@ -85,7 +89,7 @@ def init_window_pos(windowsname,x,y):
     try:
         handle = win32gui.FindWindow(None,windowsname)
         win32gui.SetWindowPos(handle, win32con.HWND_NOTOPMOST, 0, 0, x, y, win32con.SWP_SHOWWINDOW)#win32con.SWP_NOACTIVATE|win32con.SWP_SHOWWINDOW)
-        time.sleep(0.5)
+        sleep(0.5)
     except Exception as e:
         print("init_window_pos error",e)
         error_exit()
@@ -105,7 +109,7 @@ def mouse_click(windowsname,x,y):
     except Exception as e:
         print(e)
 
-    time.sleep(0.1)
+    sleep(0.1)
 # 检测 阴阳师 窗口比例是否更新
 # def check_window(dst: Image):
 #     img_x,img_y = dst.size
@@ -127,7 +131,7 @@ def mouse_click(windowsname,x,y):
 
 
 # 获取阴阳师运行状态
-def get_windows(windowsname,filename,flag):
+def get_windows(windowsname,flag) -> Image.Image|None:
     try:
         yys_handle = win32gui.FindWindow(None,windowsname)
 
@@ -154,10 +158,11 @@ def get_windows(windowsname,filename,flag):
         if f: # Vista & 7 stuff
             rect = wintypes.RECT()
             DWMWA_EXTENDED_FRAME_BOUNDS = 9
-            f(wintypes.HWND(yys_handle),
-            wintypes.DWORD(DWMWA_EXTENDED_FRAME_BOUNDS),
-            byref(rect),
-            sizeof(rect)
+            f(  
+                wintypes.HWND(yys_handle),
+                wintypes.DWORD(DWMWA_EXTENDED_FRAME_BOUNDS),
+                byref(rect),
+                sizeof(rect)
             )
             width,height = rect.right - rect.left - 2, rect.bottom - rect.top - 45 - 2
         else:      
@@ -169,33 +174,6 @@ def get_windows(windowsname,filename,flag):
             print("系统记录位置",left, top, right, bottom)
         if left < 0 or top < 0:
             print("\a请把目标窗口打开至桌面（不能最小化）")
-        # 窗口长宽
-        # width = right - left
-        # height = bottom - top
-        #if width != tmp_img_x or tmp_img_y != height:
-        # if abs(width - tmp_img_x) > 15 or abs(height - tmp_img_y) > 7:
-        #     # 将窗口放在前台，并激活该窗口（窗口不能最小化）
-        #     #win32gui.SetForegroundWindow(yys_handle)
-
-        #     # 控制窗口的位置和大小 
-        #     # 参数1：控制的窗体
-        #     # 参数2：大致方位,HWND_TOPMOST上方
-        #     # 参数3：位置x
-        #     # 参数4：位置y
-        #     # 参数5：长度
-        #     # 参数6：宽度
-        #     win32gui.SetWindowPos(yys_handle, win32con.HWND_NOTOPMOST, 0, 0, tmp_img_x, tmp_img_y, win32con.SWP_SHOWWINDOW)#win32con.SWP_NOACTIVATE|win32con.SWP_SHOWWINDOW)
-        #     time.sleep(0.5)
-        #     # 获取窗口的位置信息
-        #     left, top, right, bottom = win32gui.GetWindowRect(yys_handle)
-        #     print(left, top, right, bottom,tmp_img_x,tmp_img_y)
-        #     print()
-        #     # 窗口长宽
-        #     width = right - left
-        #     height = bottom - top
-        #     if abs(width - tmp_img_x) > 15 or abs(height - tmp_img_y) > 7:
-        #         win32gui.SetWindowPos(yys_handle, win32con.HWND_NOTOPMOST, 0, 0, tmp_img_x, tmp_img_y, win32con.SWP_SHOWWINDOW)#win32con.SWP_NOACTIVATE|win32con.SWP_SHOWWINDOW)
-        #         time.sleep(0.5)
 
         # 根据句柄创建一个DC
         newhdDC = win32ui.CreateDCFromHandle(yys_hdDC)
@@ -207,19 +185,25 @@ def get_windows(windowsname,filename,flag):
         # bitmap初始化
         saveBitmap.CreateCompatibleBitmap(newhdDC, width, height)
         saveDC.SelectObject(saveBitmap)
-        time.sleep(0.3)
-        saveDC.BitBlt((0, 0), (width, height), newhdDC, (rect.left+1,rect.top+45+1), win32con.SRCCOPY)#(left, top), win32con.SRCCOPY)
-        time.sleep(0.3)
+        sleep(0.3)
+        saveDC.BitBlt((0, 0), (width, height), newhdDC,(11,45+1), win32con.SRCCOPY) #(rect.left+1,rect.top+45+1), win32con.SRCCOPY)#(left, top), win32con.SRCCOPY)
+        sleep(0.3)
         info = saveBitmap.GetInfo()
-        #result = numpy.frombuffer(saveBitmap.GetBitmapBits(win32con.DIB_RGB_COLORS),dtype=numpy.uint8)
         result = saveBitmap.GetBitmapBits(win32con.DIB_RGB_COLORS)
-        #saveBitmap.GetBitmapBits()
-        #saveBitmap.SaveBitmapFile(saveDC, filename)
         win32gui.DeleteObject(saveBitmap.GetHandle())
         saveDC.DeleteDC()
         newhdDC.DeleteDC()
         win32gui.ReleaseDC(yys_handle,yys_hdDC)
-        return result,info
+
+        screen =[]
+        for i in result:
+            if i >= 0:
+                screen.append(i)
+            else:
+                screen.append(256+i)
+        screen = array(screen,dtype='uint8')
+        img = Image.frombuffer("RGB", (info['bmWidth'], info['bmHeight']), screen, 'raw', 'BGRX', 0, 1)
+        return img
     except Exception as error:
         print("get_window error!!!\n",error)
-        return False,False
+        return None

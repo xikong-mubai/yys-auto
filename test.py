@@ -82,24 +82,25 @@ if __name__=="__main__":
     windll.shcore.SetProcessDpiAwareness(0)
     a=get_system_dpi('')
     print(a)
-    check_windows("企业微信")
-    screen,screeninfo = get_windows("企业微信",'',1)
-    print(type(screen))
-    print(dir(screen))
-    screen_u = []
-    for i in screen:
-        if i >= 0:
-            screen_u.append(i)
-        else:
-            screen_u.append(256+i)
-    screen = numpy.array(screen_u,dtype='uint8')
+    check_windows("阴阳师-网易游戏")
+    # screen,screeninfo = get_windows("阴阳师-网易游戏",'',1)
+    # print(type(screen))
+    # print(dir(screen))
+    # screen_u = []
+    # for i in screen:
+    #     if i >= 0:
+    #         screen_u.append(i)
+    #     else:
+    #         screen_u.append(256+i)
+    #screen = numpy.array(screen_u,dtype='uint8')
     #screen = numpy.array(screen,dtype='uint8')
     #print(screen)
 
-    img = Image.frombuffer("RGB", (screeninfo['bmWidth'], screeninfo['bmHeight']), screen, 'raw', 'BGRX', 0, 1)
+    img = get_windows("阴阳师-网易游戏",'',1)#= Image.frombuffer("RGB", (screeninfo['bmWidth'], screeninfo['bmHeight']), screen, 'raw', 'BGRX', 0, 1)
 
     #img = Image.fromarray(screen.astype('uint8')).convert('RGB')
     img.show()
+    print(img.size)
     img.close()
     handle = win32gui.FindWindow(None,"阴阳师-网易游戏")
 

@@ -4,6 +4,7 @@ import win32gui,win32ui,win32con,win32api,win32print,win32process
 from ctypes import windll,wintypes,byref,sizeof
 from sys import exit
 import random,time,socket
+import numpy
 
 yys_window_name = "阴阳师-网易游戏"
 tempimg_name = "123.png"
@@ -209,10 +210,16 @@ def get_windows(windowsname,filename,flag):
         time.sleep(0.3)
         saveDC.BitBlt((0, 0), (width, height), newhdDC, (rect.left+1,rect.top+45+1), win32con.SRCCOPY)#(left, top), win32con.SRCCOPY)
         time.sleep(0.3)
-        saveBitmap.SaveBitmapFile(saveDC, filename)
+        info = saveBitmap.GetInfo()
+        #result = numpy.frombuffer(saveBitmap.GetBitmapBits(win32con.DIB_RGB_COLORS),dtype=numpy.uint8)
+        result = saveBitmap.GetBitmapBits(win32con.DIB_RGB_COLORS)
+        #saveBitmap.GetBitmapBits()
+        #saveBitmap.SaveBitmapFile(saveDC, filename)
         win32gui.DeleteObject(saveBitmap.GetHandle())
         saveDC.DeleteDC()
         newhdDC.DeleteDC()
         win32gui.ReleaseDC(yys_handle,yys_hdDC)
+        return result,info
     except Exception as error:
         print("get_window error!!!\n",error)
+        return False,False

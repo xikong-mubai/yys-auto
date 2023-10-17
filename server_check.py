@@ -1,9 +1,20 @@
-import socket
+import socket,time
 s = socket.socket()
 s.bind(('0.0.0.0',33333))
 s.listen(300)
+
+def check_time(time_list:list[list[socket.socket, float]]):
+    tmp_list = time_list.copy()
+    for i in time_list: # type: int
+        if time.time()-i[1] > 30:
+            i[0].close()
+            tmp_list.remove(i)
+    return tmp_list
+
+time_list:list[list[socket.socket, float]] = []
 while True:
     c = s.accept()
+    time_list.append([c[0],time.time()])
     c[0].settimeout(3)
     try:
         choose = c[0].recv(10).decode().strip()
@@ -15,4 +26,5 @@ while True:
         tmp_buff.close()
     except Exception as e:
         print(e)
-        c[0].close()
+    
+    time_list = check_time(time_list)

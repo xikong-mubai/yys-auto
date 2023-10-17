@@ -316,6 +316,7 @@ def watu():
 #ctypes.windll.shcore.SetProcessDpiAwareness(2)
 #yys_path = input("请输入阴阳师程序路径：")
 #os.system(yys_path)
+
 update()
 print("请稍等，正在加载资源......")
 

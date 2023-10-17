@@ -34,7 +34,7 @@ def update():
             print('new version: ',new_version)
             choose = input("检测到新版本，是否选择升级（y/n）：")
             if choose.lower() == 'y':
-                system('./update.exe')
+                system('.\\update.exe')
                 exit()
             elif choose.lower() == 'n':
                 pass

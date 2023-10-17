@@ -2,7 +2,7 @@
 # from ctypes import windll
 from sys import version_info,executable
 from util import sleep,windll,get_windows,rand_num,mouse_click,yys_window_name,init_window_pos,is_admin, \
-help ,check_windows,check_user,error_exit,get_system_dpi,Image
+help ,check_windows,check_user,error_exit,get_system_dpi,Image,update
 
 # 挖土
 def watu():
@@ -316,6 +316,7 @@ def watu():
 #ctypes.windll.shcore.SetProcessDpiAwareness(2)
 #yys_path = input("请输入阴阳师程序路径：")
 #os.system(yys_path)
+update()
 print("请稍等，正在加载资源......")
 
 x,y = 1050,572

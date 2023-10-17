@@ -1,7 +1,7 @@
 # 获取权限
 # from ctypes import windll
 from sys import version_info,executable
-from util import sleep,windll,get_windows,rand_num,mouse_click,tempimg_name,yys_window_name,init_window_pos,is_admin, \
+from util import sleep,windll,get_windows,rand_num,mouse_click,yys_window_name,init_window_pos,is_admin, \
 help ,check_windows,check_user,error_exit,get_system_dpi,Image
 
 # 挖土
@@ -100,8 +100,11 @@ def watu():
                     # 1480-1540 / 1579   762-820 / 887
                     x=rand_num(int(0.9373 * init_x),int(0.9653 * init_x))
                     y=rand_num(int(0.8791 * init_y),int(0.91446 * init_y))
+                    
+                    if flag % 2 == 1:
+                        print("\n点击位置：",x,y)
                     mouse_click(yys_window_name,int(x),int(y))
-                    print("\r开始")
+                    print("\r开始",end='')
                     sleep(10)
             
             # 判断是否是结束一阶段
@@ -121,8 +124,11 @@ def watu():
             if abs(pixel_sum[0] / length) < 5 and abs(pixel_sum[1] / length) < 5 and abs(pixel_sum[2] / length) < 5:
                 x=rand_num(int(0.87 * init_x),int(0.93 * init_x))
                 y=rand_num(int(0.85 * init_y),int(0.93 * init_y))
+                
+                if flag % 2 == 1:
+                    print("\n点击位置：",x,y)
                 mouse_click(yys_window_name,int(x),int(y))
-                print("\r结算画面一阶段")
+                print("\r结算画面一阶段",end='')
                 if flag & 2 == 2:
                     tmp_img.save('./img/war_end_1.png')
                 sleep(0.3)
@@ -144,8 +150,10 @@ def watu():
                 # pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)), clicks=1, interval=rand_num(1,4), button='left', duration=rand_num(1,3), tween=pyautogui.linear)
                 x=rand_num(int(0.87 * init_x),int(0.93 * init_x))
                 y=rand_num(int(0.85 * init_y),int(0.93 * init_y))
+                if flag % 2 == 1:
+                    print("\n点击位置：",x,y)
                 mouse_click(yys_window_name,int(x),int(y))
-                print("\r结算画面二阶段")
+                print("\r结算画面二阶段",end='')
                 if flag & 2 == 2:
                     tmp_img.save('./img/war_end_2.png')
                 if result_flag == 0:
@@ -170,7 +178,7 @@ def watu():
             
             tmp_img.close()
         
-        print('\r这是第'+str(num)+'次')
+        print('\r这是第'+str(num)+'次',end='')
 
     room_img.close()
     room_member_img.close()
@@ -378,7 +386,7 @@ if is_admin():
         #    yuling()
         elif choose == '0':
             error_exit()
-        elif choose == "4":
+        elif choose == "4":   # save_img
             flag |= 2
         elif choose == '5':   # debug
             flag |= 1

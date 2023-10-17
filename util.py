@@ -30,7 +30,7 @@ def update():
         s.send(b'update\n')
         new_version = s.recv(1000)
         new_version = new_version.decode()
-        if version.strip() == new_version.strip():
+        if version.strip() != new_version.strip():
             print('new version: ',new_version)
             choose = input("检测到新版本，是否选择升级（y/n）：")
             if choose.lower() == 'y':

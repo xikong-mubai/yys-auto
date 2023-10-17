@@ -1,4 +1,4 @@
-import win32gui,win32ui,win32con,win32api,win32print,win32process
+import win32gui,win32ui,win32con,win32api,win32print
 from PIL import Image
 # 获取权限
 from ctypes import windll,wintypes,byref,sizeof
@@ -7,6 +7,7 @@ import socket
 from time import sleep
 from random import randint
 from numpy import array
+from os import system
 
 yys_window_name = "阴阳师-网易游戏"
 tempimg_name = "123.png"
@@ -17,6 +18,32 @@ def help():
     print('4. 更新本地对比图片')
     print('5. 获取屏幕位置信息')
     print('0. 退出')
+
+def update():
+    version_fd = open('./version','r')
+    version = version_fd.read()
+    version_fd.close()
+    s = socket.socket()
+    s.settimeout(3)
+    try:
+        s.connect(('code.xibai.xyz',33333))
+        s.send(b'update\n')
+        new_version = s.recv(1000)
+        new_version = new_version.decode()
+        if version.strip() == new_version.strip():
+            print('new version: ',new_version)
+            choose = input("检测到新版本，是否选择升级（y/n）：")
+            if choose.lower() == 'y':
+                system('./update.exe')
+                exit()
+            elif choose.lower() == 'n':
+                pass
+            else:
+                print('非法输入，默认放弃升级')
+    except Exception as e:
+        print(e)
+        print('检测新版本失败，默认运行现有版本')
+    s.close()
 
 def error_exit():
     input("输入任意键退出")
@@ -78,12 +105,20 @@ def check_windows(window_name:str):
 
 def check_user(user_name:str):
     s = socket.socket()
-    s.connect(('code.xibai.xyz',33333))
-    name_list = s.recv(1500).decode('utf-8')
-    for i in name_list.split('\n'):
-        if user_name == i:
-            return True
-    return False
+    s.settimeout(3)
+    try:
+        s.connect(('code.xibai.xyz',33333))
+        s.send(b'user\n')
+        name_list = s.recv(1500).decode('utf-8')
+        s.close()
+        for i in name_list.split('\n'):
+            if user_name == i:
+                return True
+        return False
+    except Exception as e:
+        print(e)
+        print('用户信息查询失败，姑且当你是自己人，继续运行')
+        return True
 
 def init_window_pos(windowsname,x,y):
     try:

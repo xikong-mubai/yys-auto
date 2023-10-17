@@ -14,8 +14,8 @@ tempimg_name = "123.png"
 def help():
     print('1. 魂土')
     print('2. 御灵')
-    print('4. 御灵')
-    print('5. 输出')
+    print('4. 更新本地对比图片')
+    print('5. 获取屏幕位置信息')
     print('0. 退出')
 
 def error_exit():
@@ -26,7 +26,7 @@ def is_admin():
     try:
         return windll.shell32.IsUserAnAdmin()
     except Exception as e:
-        print(e)
+        print('\r\n',e)
         return False
 
 # 生成随机数
@@ -101,7 +101,6 @@ if __name__=="__main__":
     #print(win32process.GetWindowThreadProcessId(131592))
 
 def mouse_click(windowsname,x,y):
-    print("点击位置：",x,y)
     try:
         handle = win32gui.FindWindow(None,windowsname)
         win32api.SendMessage(handle,win32con.WM_LBUTTONDOWN,0,(y << 16)+x)
@@ -154,7 +153,7 @@ def get_windows(windowsname,flag) -> Image.Image|None:
             f = windll.dwmapi.DwmGetWindowAttribute
         except WindowsError:
             f = None
-            print("DwmGetWindowAttributeError")
+            print("\r\nDwmGetWindowAttributeError")
         if f: # Vista & 7 stuff
             rect = wintypes.RECT()
             DWMWA_EXTENDED_FRAME_BOUNDS = 9
@@ -170,10 +169,10 @@ def get_windows(windowsname,flag) -> Image.Image|None:
 
         left, top, right, bottom = win32gui.GetWindowRect(yys_handle)
         if flag % 2 == 1:
-            print("实际屏幕显示位置",rect.left, rect.top,rect.right , rect.bottom)
+            print("\n实际屏幕显示位置",rect.left, rect.top,rect.right , rect.bottom)
             print("系统记录位置",left, top, right, bottom)
         if left < 0 or top < 0:
-            print("\a请把目标窗口打开至桌面（不能最小化）")
+            print("\a\n请把目标窗口打开至桌面（不能最小化）")
 
         # 根据句柄创建一个DC
         newhdDC = win32ui.CreateDCFromHandle(yys_hdDC)
@@ -205,5 +204,5 @@ def get_windows(windowsname,flag) -> Image.Image|None:
         img = Image.frombuffer("RGB", (info['bmWidth'], info['bmHeight']), screen, 'raw', 'BGRX', 0, 1)
         return img
     except Exception as error:
-        print("get_window error!!!\n",error)
+        print("\r\nget_window error!!!\n",error)
         return None

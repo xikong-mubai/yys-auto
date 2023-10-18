@@ -40,7 +40,7 @@ def watu():
     war2_x_right = int(0.9893*img_x)
 
 
-    tmp_img = get_windows(yys_window_name,flag)
+    tmp_img = get_windows(yys_window_hwnd,flag)
     real_img_x,real_img_y = tmp_img.size
     tmp_img.close()
     real_wait_y = int(0.8 * real_img_y)
@@ -62,7 +62,7 @@ def watu():
 
     while num < watu_num:
         while True:
-            tmp_img = get_windows(yys_window_name,flag)
+            tmp_img = get_windows(yys_window_hwnd,flag)
             # 判断是否在房间状态
             pixel_sum = [0,0,0]
             img_pixel = []
@@ -324,14 +324,15 @@ x,y = 1050,572
 #windll.shcore.SetProcessDpiAwareness(0)
 if is_admin():
     #windll.shcore.SetProcessDpiAwareness(0)
-    global flag,dpi,a
+    global flag,dpi,a,yys_window_hwnd
     flag = 0
     # 为空会获取到资源管理器的子窗口pid（空窗口）
     yys_window_name = input("请输入目标窗口名称：")
-    result = check_windows(yys_window_name)
-    if not result[0]:
+    result,windows = check_windows(yys_window_name)
+    if not result:
         error_exit()
-    if len(result[1]) > 1:
+    choose = 0
+    if len(windows) > 1:
         print('检测到多个目标窗口，基础信息如下：')
         for i in range(len(result[1])):
             print(i,'、',result[1][i])
@@ -344,13 +345,13 @@ if is_admin():
                 break
             except Exception as e:
                 print(e)
-    yys_window_pid = result[1][choose]    
+    yys_window_hwnd = windows[choose][0]    
 
     print("当前目标窗口dpi及其dpi感知级别：",end='')
-    dpi,a = get_system_dpi(yys_window_name)
+    dpi,a = get_system_dpi(yys_window_hwnd)
     print(dpi,a)
     print("当前窗口dpi及其dpi感知级别：",end='')
-    dpi,a = get_system_dpi('')
+    dpi,a = get_system_dpi(0)
     print(dpi,a)
 
     # img_x,img_y = 1180,702
@@ -358,7 +359,7 @@ if is_admin():
     global global_x,global_y,init_x,init_y
     init_x,init_y = 754,424 # 预设画面宽高
     if a == -1 or a == 0:
-        flag |= 2
+        flag |= 4
         chang_x,chang_y = 22/dpi,57/dpi
         global_x = init_x + int(chang_x)
         global_x = global_x + 1 if chang_x - int(chang_x) > 0 else global_x
@@ -370,7 +371,7 @@ if is_admin():
 
     print("预设窗口宽高为：",global_x,global_y)
     print("初始化窗口位置...")
-    init_window_pos(yys_window_name,global_x,global_y)
+    init_window_pos(yys_window_hwnd,global_x,global_y)
     print("初始化窗口完成")
 
     config_file = open('./config','a+',encoding='utf-8')

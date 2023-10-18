@@ -328,8 +328,23 @@ if is_admin():
     flag = 0
     # 为空会获取到资源管理器的子窗口pid（空窗口）
     yys_window_name = input("请输入目标窗口名称：")
-    if not check_windows(yys_window_name):
+    result = check_windows(yys_window_name)
+    if not result[0]:
         error_exit()
+    if len(result[1]) > 1:
+        print('检测到多个目标窗口，基础信息如下：')
+        for i in range(len(result[1])):
+            print(i,'、',result[1][i])
+        while True:
+            choose = input("请选择目标窗口序号：")
+            try:
+                choose = int(choose)
+                if choose < 0 or choose >= len(result[1]):
+                    raise Exception("序号输入错误")
+                break
+            except Exception as e:
+                print(e)
+    yys_window_pid = result[1][choose]    
 
     print("当前目标窗口dpi及其dpi感知级别：",end='')
     dpi,a = get_system_dpi(yys_window_name)

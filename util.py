@@ -60,17 +60,13 @@ def is_admin():
 def rand_num(x:int, y:int):
     return round(randint(x, y),3)
  
-def get_system_dpi(window_name):
+def get_system_dpi(window_hwnd):
     """获取缩放后的分辨率"""
     #windll.shcore.SetProcessDpiAwareness(0)
     
-    if window_name == '':
-        hdwn = 0
-    else:
-        hdwn = win32gui.FindWindow(None,window_name)
-    hdc = win32gui.GetDC(hdwn)
+    hdc = win32gui.GetDC(window_hwnd)
     a = wintypes.DWORD()
-    windll.shcore.GetProcessDpiAwareness(hdwn,byref(a))
+    windll.shcore.GetProcessDpiAwareness(window_hwnd,byref(a))
     if a.value == 0:
         dpi = win32print.GetDeviceCaps(hdc, win32con.DESKTOPHORZRES) / win32print.GetDeviceCaps(hdc, win32con.HORZRES)
     else:
@@ -86,7 +82,7 @@ def _callback( hwnd, extra ):
     temp=[]
     left, top, right, bottom = win32gui.GetWindowRect(hwnd)
     #if left == 0 and top == 0 and right < 1280 and right > 640:
-    temp.append(hex(hwnd))
+    temp.append(hwnd)
     temp.append(win32gui.GetClassName(hwnd))
     temp.append(win32gui.GetWindowText(hwnd))
     temp.append((left, top, right, bottom))
@@ -126,10 +122,9 @@ def check_user(user_name:str):
         print('用户信息查询失败，姑且当你是自己人，继续运行')
         return True
 
-def init_window_pos(windowsname,x,y):
+def init_window_pos(window_hwnd,x,y):
     try:
-        handle = win32gui.FindWindow(None,windowsname)
-        win32gui.SetWindowPos(handle, win32con.HWND_NOTOPMOST, 0, 0, x, y, win32con.SWP_SHOWWINDOW)#win32con.SWP_NOACTIVATE|win32con.SWP_SHOWWINDOW)
+        win32gui.SetWindowPos(window_hwnd, win32con.HWND_NOTOPMOST, 0, 0, x, y, win32con.SWP_SHOWWINDOW)#win32con.SWP_NOACTIVATE|win32con.SWP_SHOWWINDOW)
         sleep(0.5)
     except Exception as e:
         print("init_window_pos error",e)
@@ -141,11 +136,10 @@ if __name__=="__main__":
     check_windows("阴阳师-网易游戏")
     #print(win32process.GetWindowThreadProcessId(131592))
 
-def mouse_click(windowsname,x,y):
+def mouse_click(window_hwnd,x,y):
     try:
-        handle = win32gui.FindWindow(None,windowsname)
-        win32api.SendMessage(handle,win32con.WM_LBUTTONDOWN,0,(y << 16)+x)
-        win32api.SendMessage(handle,win32con.WM_LBUTTONUP,0,(y << 16)+x)
+        win32api.SendMessage(window_hwnd,win32con.WM_LBUTTONDOWN,0,(y << 16)+x)
+        win32api.SendMessage(window_hwnd,win32con.WM_LBUTTONUP,0,(y << 16)+x)
     except Exception as e:
         print(e)
 
@@ -171,23 +165,21 @@ def mouse_click(windowsname,x,y):
 
 
 # 获取阴阳师运行状态
-def get_windows(windowsname,flag) -> Image.Image|None:
+def get_windows(window_hwnd,flag) -> Image.Image|None:
     try:
-        yys_handle = win32gui.FindWindow(None,windowsname)
-
         # time.sleep(0.3)
         # pythoncom.CoInitialize()
         # shell = win32com.client.Dispatch("WScript.Shell")
         # shell.SendKeys('%')
         # # 将窗口放在前台，并激活该窗口（窗口不能最小化）
-        # #win32gui.SetForegroundWindow(yys_handle)
+        # #win32gui.SetForegroundWindow(window_hwnd)
         # time.sleep(0.3)
         # pythoncom.CoInitialize()
         # shell = win32com.client.Dispatch("WScript.Shell")
         # shell.SendKeys('%')
         
         # 获取窗口DC
-        yys_hdDC = win32gui.GetWindowDC(yys_handle)
+        window_hdDC = win32gui.GetWindowDC(window_hwnd)
         
         # 获取窗口的位置信息
         try:
@@ -199,7 +191,7 @@ def get_windows(windowsname,flag) -> Image.Image|None:
             rect = wintypes.RECT()
             DWMWA_EXTENDED_FRAME_BOUNDS = 9
             f(  
-                wintypes.HWND(yys_handle),
+                wintypes.HWND(window_hwnd),
                 wintypes.DWORD(DWMWA_EXTENDED_FRAME_BOUNDS),
                 byref(rect),
                 sizeof(rect)
@@ -208,7 +200,7 @@ def get_windows(windowsname,flag) -> Image.Image|None:
         else:      
             width,height = (0,0)
 
-        left, top, right, bottom = win32gui.GetWindowRect(yys_handle)
+        left, top, right, bottom = win32gui.GetWindowRect(window_hwnd)
         if flag % 2 == 1:
             print("\n实际屏幕显示位置",rect.left, rect.top,rect.right , rect.bottom)
             print("系统记录位置",left, top, right, bottom)
@@ -216,7 +208,7 @@ def get_windows(windowsname,flag) -> Image.Image|None:
             print("\a\n请把目标窗口打开至桌面（不能最小化）")
 
         # 根据句柄创建一个DC
-        newhdDC = win32ui.CreateDCFromHandle(yys_hdDC)
+        newhdDC = win32ui.CreateDCFromHandle(window_hdDC)
         # 创建一个兼容设备内存的DC
         saveDC = newhdDC.CreateCompatibleDC()
         # 创建bitmap保存图片
@@ -233,7 +225,7 @@ def get_windows(windowsname,flag) -> Image.Image|None:
         win32gui.DeleteObject(saveBitmap.GetHandle())
         saveDC.DeleteDC()
         newhdDC.DeleteDC()
-        win32gui.ReleaseDC(yys_handle,yys_hdDC)
+        win32gui.ReleaseDC(window_hwnd,window_hdDC)
 
         screen =[]
         for i in result:

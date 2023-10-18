@@ -63,6 +63,7 @@ def rand_num(x:int, y:int):
 def get_system_dpi(window_name):
     """获取缩放后的分辨率"""
     #windll.shcore.SetProcessDpiAwareness(0)
+    
     if window_name == '':
         hdwn = 0
     else:
@@ -92,15 +93,20 @@ def _callback( hwnd, extra ):
     windows[hwnd] = temp
   
 def check_windows(window_name:str):
-    windows = {}
+    windows = {} ; length = 0
+    dst = []
     win32gui.EnumWindows(_callback, windows)
     # print("Enumerated a total of  windows with %d classes"%(len(windows)))
     for item in windows:
         if window_name == windows[item][2] and window_name != "":
-            print(window_name+" confirms existence")
-            return True
-    print(window_name+" is notfound")
-    return False
+            dst.append(windows[item])
+            length += 1
+    
+    if length == 0:
+        print(window_name+" is notfound")
+        return False,dst
+    
+    return True,dst
 
 
 def check_user(user_name:str):
@@ -132,7 +138,7 @@ def init_window_pos(windowsname,x,y):
 if __name__=="__main__":
     a=get_system_dpi('')
     print(a)
-    check_windows("阴阳师")
+    check_windows("阴阳师-网易游戏")
     #print(win32process.GetWindowThreadProcessId(131592))
 
 def mouse_click(windowsname,x,y):

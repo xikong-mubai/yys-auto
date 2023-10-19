@@ -103,7 +103,7 @@ def watu():
                     
                     if flag % 2 == 1:
                         print("\n点击位置：",x,y)
-                    mouse_click(yys_window_name,int(x),int(y))
+                    mouse_click(yys_window_hwnd,int(x),int(y))
                     print("\r开始",end='')
                     sleep(10)
             
@@ -127,7 +127,7 @@ def watu():
                 
                 if flag % 2 == 1:
                     print("\n点击位置：",x,y)
-                mouse_click(yys_window_name,int(x),int(y))
+                mouse_click(yys_window_hwnd,int(x),int(y))
                 print("\r结算画面一阶段",end='')
                 if flag & 2 == 2:
                     tmp_img.save('./img/war_end_1.png')
@@ -152,7 +152,7 @@ def watu():
                 y=rand_num(int(0.85 * init_y),int(0.93 * init_y))
                 if flag % 2 == 1:
                     print("\n点击位置：",x,y)
-                mouse_click(yys_window_name,int(x),int(y))
+                mouse_click(yys_window_hwnd,int(x),int(y))
                 print("\r结算画面二阶段",end='')
                 if flag & 2 == 2:
                     tmp_img.save('./img/war_end_2.png')
@@ -334,8 +334,8 @@ if is_admin():
     choose = 0
     if len(windows) > 1:
         print('检测到多个目标窗口，基础信息如下：')
-        for i in range(len(result[1])):
-            print(i,'、',result[1][i])
+        for i in range(len(windows)):
+            print(i,'、',windows[i])
         while True:
             choose = input("请选择目标窗口序号：")
             try:
@@ -345,7 +345,7 @@ if is_admin():
                 break
             except Exception as e:
                 print(e)
-    yys_window_hwnd = windows[choose][0]    
+    yys_window_hwnd = windows[choose][0]
 
     print("当前目标窗口dpi及其dpi感知级别：",end='')
     dpi,a = get_system_dpi(yys_window_hwnd)

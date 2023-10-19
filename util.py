@@ -15,7 +15,7 @@ tempimg_name = "123.png"
 def help():
     print('1. 魂土')
     print('2. 御灵')
-    print('4. 更新本地对比图片')
+    print('4. 更新本地对比图片（此功能未完善）')
     print('5. 获取屏幕位置信息')
     print('0. 退出')
 

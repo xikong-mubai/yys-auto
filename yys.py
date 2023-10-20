@@ -6,7 +6,6 @@ help ,check_windows,check_user,error_exit,get_system_dpi,Image,update
 
 # 挖土
 def watu():
-    
     num = 0 ; result_flag = 0
     watu_num = eval(input("准备刷多少次？"))
     print()
@@ -189,130 +188,187 @@ def watu():
     print("刷了"+str(num)+"次")
     print()
 
-# def yuling():
-#     get_windows(yys_window_name,tempimg_name,flag)
-
-#     while True:
-#         day = input("打哪个御灵，从左往右按御灵的开放日期算（比如周二暗神龙就输入一个“2”）：")
-#         yuling_img = ''
-#         if len(day) != 1:
-#             print("请按照例子输入，否则我不认识的嗷")
-#         else:
-#             if day == "2":
-#                 yuling_img = 'yuling_2'
-#             elif day == '3':
-#                 yuling_img = 'yuling_3'
-#             elif day == '4':
-#                 yuling_img = 'yuling_4'
-#             elif day == '5':
-#                 yuling_img = 'yuling_5'
-#             else:
-#                 print('我不认识它呢亲亲')
-#                 continue
-#             break
-#     num = 0
-#     flag = eval(input("准备刷多少次？"))
-#     print()
-#     room_img = Image.open('./img/'+yuling_img+'/yuling_start.png')
-#     war1_img = Image.open('./img/'+yuling_img+'/yuling_end_1.png')
-#     war2_img = Image.open('./img/'+yuling_img+'/yuling_end_2.png')
+def yuling():
+    while True:
+        day = input("打哪个御灵，从左往右按御灵的开放日期算（比如周二暗神龙就输入一个“2”）：")
+        yuling_img = ''
+        if len(day) != 1:
+            print("请按照例子输入，否则我不认识的嗷")
+        else:
+            if day == "2":
+                yuling_img = 'yuling_2'
+            elif day == '3':
+                yuling_img = 'yuling_3'
+            elif day == '4':
+                yuling_img = 'yuling_4'
+            elif day == '5':
+                yuling_img = 'yuling_5'
+            else:
+                print('我不认识它呢亲亲')
+                continue
+            break
+    num = 0 ; result_flag = 0
+    flag = eval(input("准备刷多少次？"))
+    start_img = Image.open('./img/'+yuling_img+'/yuling_start.png')
+    war1_img = Image.open('./img/'+yuling_img+'/yuling_end_1.png')
+    war2_img = Image.open('./img/'+yuling_img+'/yuling_end_2.png')
 #     defeat_img = Image.open('./img/defeat.png')
-#     img_x,img_y = room_img.size
+    img_x,img_y = start_img.size
+    tmp = get_windows(yys_window_hwnd,flag)
+    real_x,real_y = tmp.size
+    tmp.close()
+    x1,y1 = start_img.size
+    # 1153  679  370   425
+    y1 = int(425/679 * y1)
+    x1_2 = int(300/1153 * x1)
+    x1_1 = int(75/1153 * x1)
+    real_y1 = int(425/679 * real_y)
+    real_x1_2 = int(300/1153 * real_x)
+    real_x1_1 = int(75/1153 * real_x)
 
-#     x1,y1 = room_img.size
-#     # 1153  679  370   425
-#     y1 = int(425/679 * y1)
-#     x1_2 = int(300/1153 * x1)
-#     x1_1 = int(75/1153 * x1)
+    x2,y2 = war1_img.size
+    # 0.884 , 0 - 0.10
+    y2 = int(0.884 * y2)
+    x2_2 = int(x2 * 0.10)
+    x2_1 = int(15/1153 * x2)
+    real_y2 = int(425/679 * real_y)
+    real_x2_2 = int(300/1153 * real_x)
+    real_x2_1 = int(75/1153 * real_x)
 
-#     x2,y2 = war1_img.size
-#     # 0.884 , 0 - 0.10
-#     y2 = int(0.884 * y2)
-#     x2_2 = int(x2 * 0.10)
-#     x2_1 = int(15/1153 * x2)
+    x3,y3 = war2_img.size
+    # 0.963 , 0.25 - 0.33
+    y3 = int(0.963 * y3)
+    x3 = int(0.33 * x3)
+    real_y3 = int(425/679 * real_y)
+    real_x3_2 = int(300/1153 * real_x)
+    real_x4_1 = int(75/1153 * real_x)
 
-#     x3,y3 = war2_img.size
-#     # 0.963 , 0.25 - 0.33
-#     y3 = int(0.963 * y3)
-#     x3 = int(0.33 * x3)
+    # x4,y4 = defeat_img.size
+    # # 1152,681  300,180 -> 480,180
+    # x4_1 = int(300/1152 * x4)
+    # x4_2 = int(480/1152 * x4)
+    # y4 = int(180/681 * y4)
 
-#     x4,y4 = defeat_img.size
-#     # 1152,681  300,180 -> 480,180
-#     x4_1 = int(300/1152 * x4)
-#     x4_2 = int(480/1152 * x4)
-#     y4 = int(180/681 * y4)
+    while True:
+        tmp_img = get_windows(yys_window_hwnd,flag)
+        
+        if num >= flag:
+            break
 
-#     while True:
-#         get_windows(yys_window_name,tempimg_name,flag)
-#         tmp_img = Image.open('123.png')
+        # 判断是否在房间状态
+        pixel_sum = [0,0,0]
+        img_pixel = []
+        for i in range(x1_1,x1_2,int((x1_2-x1_1)/9)):
+            img_pixel.append(start_img.getpixel((i,y1)))
+        tmp_pixel = []
+        for i in range(real_x1_1,real_x1_2,int((real_x1_2 - real_x1_1)/9)):
+            tmp_pixel.append(tmp_img.getpixel((i,real_y1)))        
+        length = min(len(tmp_pixel),len(img_pixel))
+        for i in range(length):
+            pixel_sum[0] += abs(tmp_pixel[i][0] - img_pixel[i][0])
+            pixel_sum[1] += abs(tmp_pixel[i][1] - img_pixel[i][1])
+            pixel_sum[2] += abs(tmp_pixel[i][2] - img_pixel[i][2])
         
-#         if num >= flag:
-#             break
+        if abs(pixel_sum[0] / length) < 5 and abs(pixel_sum[1] / length) < 5 and abs(pixel_sum[2] / length) < 5:
+            # pyautogui.click(x=rand_num(int(0.8987 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)), clicks=1, interval=rand_num(1,4), button='left', duration=rand_num(1,3), tween=pyautogui.linear)
+            #pyautogui.click(x=rand_num(int(0.872 * img_x),int(0.925 * img_x)), y=rand_num(int(0.85 * img_y),int(0.932 * img_y)))
+            x=rand_num(int(0.872 * img_x),int(0.925 * img_x))
+            y=rand_num(int(0.85 * img_y),int(0.932 * img_y))
+            mouse_click(yys_window_hwnd,int(x),int(y))
+            result_flag = 0
+            sleep(0.5)
+        
+        # 判断是否是结束一阶段
+        pixel_sum = [0,0,0]
+        for i in range(x2_1,x2_2,int((x2_2-x2_1)/9)):
+            tmp_pixel = tmp_img.getpixel((i,y2))
+            war1_pixel = war1_img.getpixel((i,y2))
+            pixel_sum[0] += abs(tmp_pixel[0] - war1_pixel[0])
+            pixel_sum[1] += abs(tmp_pixel[1] - war1_pixel[1])
+            pixel_sum[2] += abs(tmp_pixel[2] - war1_pixel[2])
+        
+        if abs(pixel_sum[0] / 9 < 10) and abs(pixel_sum[1] / 9) < 10 and abs(pixel_sum[2] / 10) < 10:
+            # pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)), clicks=1, interval=rand_num(1,4), button='left', duration=rand_num(1,3), tween=pyautogui.linear)
+            #pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)))
+            x=rand_num(int(0.923 * img_x),int(0.9615 * img_x))
+            y=rand_num(int(0.8551 * img_y),int(0.924 * img_y))
+            mouse_click(yys_window_hwnd,int(x),int(y))
+            sleep(0.3)
+        
+        # 判断是否是结束二阶段
+        pixel_sum = [0,0,0]
+        for i in range(x2_2,x3,int((x3-x2_2)/9)):
+            tmp_pixel = tmp_img.getpixel((i,y3))
+            war2_pixel = war2_img.getpixel((i,y3))
+            pixel_sum[0] += abs(tmp_pixel[0] - war2_pixel[0])
+            pixel_sum[1] += abs(tmp_pixel[1] - war2_pixel[1])
+            pixel_sum[2] += abs(tmp_pixel[2] - war2_pixel[2])
+        
+        if abs(pixel_sum[0] / 9) < 10 and abs(pixel_sum[1] / 9) < 10 and abs(pixel_sum[2] / 10) < 10:
+            # pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)), clicks=1, interval=rand_num(1,4), button='left', duration=rand_num(1,3), tween=pyautogui.linear)
+            #pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)))
+            x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)),
+            y=rand_num(int(0.8551 * img_y),int(0.924 * img_y))
+            mouse_click(yys_window_hwnd,int(x),int(y))
+            if result_flag == 0:
+                result_flag = 1
+                num += 1
+            sleep(0.3)
+        
+        # 判断是否是 defeat
+        # pixel_sum = [0,0,0]
+        # for i in range(x4_1,x4_2,int((x4_2-x4_1)/9)):
+        #     tmp_pixel = tmp_img.getpixel((i,y4))
+        #     defeat_pixel = defeat_img.getpixel((i,y4))
+        #     pixel_sum[0] += abs(tmp_pixel[0] - defeat_pixel[0])
+        #     pixel_sum[1] += abs(tmp_pixel[1] - defeat_pixel[1])
+        #     pixel_sum[2] += abs(tmp_pixel[2] - defeat_pixel[2])
+        
+        # if abs(pixel_sum[0] / 9) < 10 and abs(pixel_sum[1] / 9) < 10 and abs(pixel_sum[2] / 10) < 10:
+        #     # pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)), clicks=1, interval=rand_num(1,4), button='left', duration=rand_num(1,3), tween=pyautogui.linear)
+        #     pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)))
+        #     sleep(0.3)
 
-#         # 判断是否在房间状态
-#         pixel_sum = [0,0,0]
-#         for i in range(x1_1,x1_2,int((x1_2-x1_1)/9)):
-#             tmp_pixel = tmp_img.getpixel((i,y1))
-#             room_pixel = room_img.getpixel((i,y1))
-#             pixel_sum[0] += abs(tmp_pixel[0] - room_pixel[0])
-#             pixel_sum[1] += abs(tmp_pixel[1] - room_pixel[1])
-#             pixel_sum[2] += abs(tmp_pixel[2] - room_pixel[2])
-        
-#         if abs(pixel_sum[0] / 9) < 10 and abs(pixel_sum[1] / 9) < 10 and abs(pixel_sum[2] / 10) < 10:
-#             # pyautogui.click(x=rand_num(int(0.8987 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)), clicks=1, interval=rand_num(1,4), button='left', duration=rand_num(1,3), tween=pyautogui.linear)
-#             pyautogui.click(x=rand_num(int(0.872 * img_x),int(0.925 * img_x)), y=rand_num(int(0.85 * img_y),int(0.932 * img_y)))
-#             num += 1
-#             sleep(10)
-        
-#         # 判断是否是结束一阶段
-#         pixel_sum = [0,0,0]
-#         for i in range(x2_1,x2_2,int((x2_2-x2_1)/9)):
-#             tmp_pixel = tmp_img.getpixel((i,y2))
-#             war1_pixel = war1_img.getpixel((i,y2))
-#             pixel_sum[0] += abs(tmp_pixel[0] - war1_pixel[0])
-#             pixel_sum[1] += abs(tmp_pixel[1] - war1_pixel[1])
-#             pixel_sum[2] += abs(tmp_pixel[2] - war1_pixel[2])
-        
-#         if abs(pixel_sum[0] / 9 < 10) and abs(pixel_sum[1] / 9) < 10 and abs(pixel_sum[2] / 10) < 10:
-#             # pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)), clicks=1, interval=rand_num(1,4), button='left', duration=rand_num(1,3), tween=pyautogui.linear)
-#             pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)))
-#             sleep(0.3)
-        
-#         # 判断是否是结束二阶段
-#         pixel_sum = [0,0,0]
-#         for i in range(x2_2,x3,int((x3-x2_2)/9)):
-#             tmp_pixel = tmp_img.getpixel((i,y3))
-#             war2_pixel = war2_img.getpixel((i,y3))
-#             pixel_sum[0] += abs(tmp_pixel[0] - war2_pixel[0])
-#             pixel_sum[1] += abs(tmp_pixel[1] - war2_pixel[1])
-#             pixel_sum[2] += abs(tmp_pixel[2] - war2_pixel[2])
-        
-#         if abs(pixel_sum[0] / 9) < 10 and abs(pixel_sum[1] / 9) < 10 and abs(pixel_sum[2] / 10) < 10:
-#             # pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)), clicks=1, interval=rand_num(1,4), button='left', duration=rand_num(1,3), tween=pyautogui.linear)
-#             pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)))
-#             sleep(0.3)
-        
-#         # 判断是否是 defeat
-#         pixel_sum = [0,0,0]
-#         for i in range(x4_1,x4_2,int((x4_2-x4_1)/9)):
-#             tmp_pixel = tmp_img.getpixel((i,y4))
-#             defeat_pixel = defeat_img.getpixel((i,y4))
-#             pixel_sum[0] += abs(tmp_pixel[0] - defeat_pixel[0])
-#             pixel_sum[1] += abs(tmp_pixel[1] - defeat_pixel[1])
-#             pixel_sum[2] += abs(tmp_pixel[2] - defeat_pixel[2])
-        
-#         if abs(pixel_sum[0] / 9) < 10 and abs(pixel_sum[1] / 9) < 10 and abs(pixel_sum[2] / 10) < 10:
-#             # pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)), clicks=1, interval=rand_num(1,4), button='left', duration=rand_num(1,3), tween=pyautogui.linear)
-#             pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)))
-#             sleep(0.3)
-
-#         print('\r这是第'+str(num)+'次',end='')
+        print('\r这是第'+str(num)+'次',end='')
     
-#     print("已结束！")
-#     print("刷了"+str(num)+"次")
-#     print()
+    print("已结束！")
+    print("刷了"+str(num)+"次")
+    print()
 
+def save_img():
+    print("请将游戏运行至对应画面的时刻，然后输入 1 进行画面截取确认。不需要重新截取的时刻输入 0 跳过")
+    choose = input("房主等待，房间成员未进入之前。确认后截取（房间成员等待房主邀请请输入2）：").strip()
+    window = get_windows(yys_window_hwnd,flag)
+    if choose == '1':
+        window.save('./img/room_wait.png')
+    elif choose == '2':
+        window.save('./img/room_wait_member_1.png')
+    choose = input("结算时的数据统计画面。确认后截取：").strip()
+    window = get_windows(yys_window_hwnd,flag)
+    if choose == '1':
+        window.save('./img/war_end_1.png')
+    choose = input("结算时的奖励界面。确认后截取：").strip()
+    window = get_windows(yys_window_hwnd,flag)
+    if choose == '1':
+        window.save('./img/war_end_2.png')
 
+    choose = input("请确认是否截取御灵画面（y/n）：").strip()
+    if choose == 'y':
+        choose = input("按照工作日时间选择需要截取的御灵画面（2、3、4、5）：").strip()
+        yuling_path = './img/yuling_'+choose
+
+    choose = input("点击挑战的界面。确认后截取：").strip()
+    window = get_windows(yys_window_hwnd,flag)
+    if choose == '1':
+        window.save(yuling_path+'/yuling_start.png')
+    choose = input("结算时的数据统计画面。确认后截取：").strip()
+    window = get_windows(yys_window_hwnd,flag)
+    if choose == '1':
+        window.save(yuling_path+'/yuling_end_1.png')
+    choose = input("结算时的奖励界面。确认后截取：").strip()
+    window = get_windows(yys_window_hwnd,flag)
+    if choose == '1':
+        window.save(yuling_path+'/yuling_end_2.png')
 #ctypes.windll.shcore.SetProcessDpiAwareness(2)
 #yys_path = input("请输入阴阳师程序路径：")
 #os.system(yys_path)
@@ -400,8 +456,8 @@ if is_admin():
         choose = input('请选择模式：')
         if choose == '1':
             watu()
-        #elif flag == '2':
-        #    yuling()
+        elif flag == '2':
+            yuling()
         elif choose == '0':
             error_exit()
         elif choose == "4":   # save_img

@@ -393,10 +393,10 @@ if is_admin():
         for i in range(len(windows)):
             print(i,'、',windows[i])
         while True:
-            choose = input("请选择目标窗口序号：")
+            choose = input("请选择目标窗口序号：").strip()
             try:
                 choose = int(choose)
-                if choose < 0 or choose >= len(result[1]):
+                if choose < 0 or choose >= len(windows):
                     raise Exception("序号输入错误")
                 break
             except Exception as e:

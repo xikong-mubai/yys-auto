@@ -15,62 +15,6 @@ gdi32 = windll.gdi32
 # 获取权限
 #import random
 
-class RECT(ctypes.Structure):
-    _fields_ = [
-        ('left', ctypes.c_long),
-        ('top', ctypes.c_long),
-        ('right', ctypes.c_long),
-        ('bottom', ctypes.c_long)
-    ]
-
-
-class BITMAPINFOHEADER(ctypes.Structure):
-    _fields_ = [
-        ("biSize", wintypes.DWORD),
-        ("biWidth", ctypes.c_long),
-        ("biHeight", ctypes.c_long),
-        ("biPlanes", wintypes.WORD),
-        ("biBitCount", wintypes.WORD),
-        ("biCompression", wintypes.DWORD),
-        ("biSizeImage", wintypes.DWORD),
-        ("biXPelsPerMeter", ctypes.c_long),
-        ("biYPelsPerMeter", ctypes.c_long),
-        ("biClrUsed", wintypes.DWORD),
-        ("biClrImportant", wintypes.DWORD)
-    ]
-
-
-class RGBQUAD(ctypes.Structure):
-    _fields_ = [
-        ("rgbBlue", wintypes.BYTE),
-        ("rgbGreen", wintypes.BYTE),
-        ("rgbRed", wintypes.BYTE),
-        #("rgbReserved", ctypes.c_void_p)
-        ("rgbReserved", wintypes.BYTE)
-    ]
-
-
-class BITMAP(ctypes.Structure):
-    _fields_ = [
-        ("bmType", ctypes.c_long),
-        ("bmWidth", ctypes.c_long),
-        ("bmHeight", ctypes.c_long),
-        ("bmWidthBytes", ctypes.c_long),
-        ("bmPlanes", wintypes.DWORD),
-        ("bmBitsPixel", wintypes.DWORD),
-        ("bmBits", ctypes.c_void_p)
-    ]
-
-class BITMAPINFO(ctypes.Structure):
-    _fields_ = [
-        ("bmiHeader",BITMAPINFOHEADER),
-        ("bmiColors",RGBQUAD)
-    ]
-
-win32con.DIB_RGB_COLORS
-
-
-
 from util import mouse_click,rand_num,get_system_dpi,check_windows,get_windows
 
 import numpy

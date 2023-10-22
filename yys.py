@@ -208,7 +208,7 @@ def yuling():
                 continue
             break
     num = 0 ; result_flag = 0
-    flag = eval(input("准备刷多少次？"))
+    yuling_num = eval(input("准备刷多少次？"))
     start_img = Image.open('./img/'+yuling_img+'/yuling_start.png')
     war1_img = Image.open('./img/'+yuling_img+'/yuling_end_1.png')
     war2_img = Image.open('./img/'+yuling_img+'/yuling_end_2.png')
@@ -252,7 +252,7 @@ def yuling():
     while True:
         tmp_img = get_windows(yys_window_hwnd,flag)
         
-        if num >= flag:
+        if num >= yuling_num:
             break
 
         # 判断是否在房间状态
@@ -456,12 +456,12 @@ if is_admin():
         choose = input('请选择模式：')
         if choose == '1':
             watu()
-        elif flag == '2':
+        elif choose == '2':
             yuling()
         elif choose == '0':
             error_exit()
         elif choose == "4":   # save_img
-            flag |= 2
+            save_img()
         elif choose == '5':   # debug
             flag |= 1
         else:

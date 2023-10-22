@@ -104,7 +104,7 @@ def watu():
                         print("\n点击位置：",x,y)
                     mouse_click(yys_window_hwnd,int(x),int(y))
                     print("\r开始",end='')
-                    sleep(10)
+                    sleep(0.3)
             
             # 判断是否是结束一阶段
             pixel_sum = [0,0,0]

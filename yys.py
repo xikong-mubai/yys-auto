@@ -26,12 +26,12 @@ def watu():
     wait_x = int(0.70 * img_x)
 
     # 835/887
-    #war1_y = int(0.94138 * img_y)
+    # war1_y = int(0.94138 * img_y)
     # 780/887
     war1_y_top = int(0.879 * img_y)
     # 17/1579
     war1_x_left = int(0.0107 * img_x)
-    #war1_x = int(0.70 * img_x)
+    # war1_x = int(0.70 * img_x)
 
     # war2_y = int(0.963 * img_y)
     # war2_x_left = int( * img_x)
@@ -52,7 +52,7 @@ def watu():
     real_war1_y_top = int(0.879 * real_img_y)
     # 17/1579
     real_war1_x_left = int(0.0107 * real_img_x)
-    #war1_x = int(0.70 * img_x)
+    # war1_x = int(0.70 * img_x)
 
     # war2_y = int(0.963 * img_y)
     # war2_x_left = int( * img_x)
@@ -212,7 +212,7 @@ def yuling():
     start_img = Image.open('./img/'+yuling_img+'/yuling_start.png')
     war1_img = Image.open('./img/'+yuling_img+'/yuling_end_1.png')
     war2_img = Image.open('./img/'+yuling_img+'/yuling_end_2.png')
-#     defeat_img = Image.open('./img/defeat.png')
+    # defeat_img = Image.open('./img/defeat.png')
     img_x,img_y = start_img.size
     tmp = get_windows(yys_window_hwnd,flag)
     real_x,real_y = tmp.size
@@ -369,17 +369,17 @@ def save_img():
     window = get_windows(yys_window_hwnd,flag)
     if choose == '1':
         window.save(yuling_path+'/yuling_end_2.png')
-#ctypes.windll.shcore.SetProcessDpiAwareness(2)
-#yys_path = input("请输入阴阳师程序路径：")
-#os.system(yys_path)
+# ctypes.windll.shcore.SetProcessDpiAwareness(2)
+# yys_path = input("请输入阴阳师程序路径：")
+# os.system(yys_path)
 
 update()
 print("请稍等，正在加载资源......")
 
 x,y = 1050,572
-#windll.shcore.SetProcessDpiAwareness(0)
+# windll.shcore.SetProcessDpiAwareness(0)
 if is_admin():
-    #windll.shcore.SetProcessDpiAwareness(0)
+    # windll.shcore.SetProcessDpiAwareness(0)
     global flag,dpi,a,yys_window_hwnd
     flag = 0
     # 为空会获取到资源管理器的子窗口pid（空窗口）

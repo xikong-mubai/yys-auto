@@ -8,6 +8,7 @@ from PIL import Image
 import win32gui,win32ui,win32con,win32api,win32print,win32process
 #from PIL import Image
 from ctypes import windll,wintypes
+
 import ctypes
 user32 = windll.user32
 gdi32 = windll.gdi32
@@ -22,9 +23,19 @@ import numpy
 yys_window_name = "阴阳师-网易游戏"
 tempimg_name = "123.png"
 
+def _callback( hwnd, extra ):
+    windows = extra
+    temp=[]
+    left, top, right, bottom = win32gui.GetWindowRect(hwnd)
+    #if left == 0 and top == 0 and right < 1280 and right > 640:
+    temp.append(hwnd)
+    temp.append(win32gui.GetClassName(hwnd))
+    temp.append(win32gui.GetWindowText(hwnd))
+    windows[hwnd] = temp
+
 if __name__=="__main__":
     windll.shcore.SetProcessDpiAwareness(0)
-    a=get_system_dpi('')
+    a=get_system_dpi(0x0470908)
     print(a)
     check_windows("阴阳师-网易游戏")
     # screen,screeninfo = get_windows("阴阳师-网易游戏",'',1)
@@ -40,7 +51,18 @@ if __name__=="__main__":
     #screen = numpy.array(screen,dtype='uint8')
     #print(screen)
 
-    img = get_windows("阴阳师-网易游戏",'',1)#= Image.frombuffer("RGB", (screeninfo['bmWidth'], screeninfo['bmHeight']), screen, 'raw', 'BGRX', 0, 1)
+# 00470908
+
+    img = get_windows(0x00470908,1)#= Image.frombuffer("RGB", (screeninfo['bmWidth'], screeninfo['bmHeight']), screen, 'raw', 'BGRX', 0, 1)
+
+    dc = win32gui.GetWindowDC(0x00470908)
+    a = win32gui.GetDlgCtrlID(0x003063A)
+    print(a)
+    windows = {}
+    win32gui.EnumChildWindows(0x0470908,_callback,windows)
+    print(windows)
+    print(win32gui.GetMessage(0x0470908,0,300))
+    print(win32gui.GetDlgItem(0x003063A,a))#.GetClassName(0x00470908))
 
     #img = Image.fromarray(screen.astype('uint8')).convert('RGB')
     img.show()
@@ -63,32 +85,3 @@ if __name__=="__main__":
     # x=rand_num(int(0.87 * img_x),int(0.93 * img_x))
     # y=rand_num(int(0.85 * img_y),int(0.93 * img_y))
     # mouse_click(yys_window_name,x,y)
-
-# try:
-#     f = ctypes.windll.dwmapi.DwmGetWindowAttribute
-# except WindowsError:
-#     f = None
-# if f: # Vista & 7 stuff
-#     rect = ctypes.wintypes.RECT()
-#     DWMWA_EXTENDED_FRAME_BOUNDS = 9
-#     f(ctypes.wintypes.HWND(win32gui.FindWindow(None,'阴阳师-网易游戏')),
-#       ctypes.wintypes.DWORD(DWMWA_EXTENDED_FRAME_BOUNDS),
-#       ctypes.byref(rect),
-#       ctypes.sizeof(rect)
-#       )
-#     size = (rect.right - rect.left, rect.bottom - rect.top)        
-#     print(dir(rect))
-# else:      
-#     size = (1)
-# print(size)
-# print(rect.right , rect.left, rect.bottom , rect.top) 
-
-# #win32api.SendMessage(win32gui.FindWindow(None,'阴阳师-网易游戏'),win32con.WM_,0x1b,0)
-
-# win32api.SendMessage(win32gui.FindWindow(None,'阴阳师-网易游戏'),win32con.WM_LBUTTONDOWN,0,0x3520640)
-# win32api.SendMessage(win32gui.FindWindow(None,'阴阳师-网易游戏'),win32con.WM_LBUTTONUP,0,0x3520640)
-
-# # time.sleep(3)
-
-# # win32api.SendMessage(win32gui.FindWindow(None,'阴阳师-网易游戏'),win32con.WM_LBUTTONDOWN,0,0)
-# # win32api.SendMessage(win32gui.FindWindow(None,'阴阳师-网易游戏'),win32con.WM_LBUTTONUP,0,0)

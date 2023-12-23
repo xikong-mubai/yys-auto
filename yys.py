@@ -356,6 +356,8 @@ def save_img():
     if choose == 'y':
         choose = input("按照工作日时间选择需要截取的御灵画面（2、3、4、5）：").strip()
         yuling_path = './img/yuling_'+choose
+    else:
+        return 
 
     choose = input("点击挑战的界面。确认后截取：").strip()
     window = get_windows(yys_window_hwnd,flag)

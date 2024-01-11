@@ -3,7 +3,7 @@ from PIL import Image
 # 获取权限
 from ctypes import windll,wintypes,byref,sizeof
 from sys import exit
-import socket
+import socket,json
 from time import sleep
 from random import randint
 from numpy import array
@@ -12,11 +12,11 @@ from os import system
 yys_window_name = "阴阳师-网易游戏"
 tempimg_name = "123.png"
 
-def help():
-    print('1. 魂土')
-    print('2. 御灵')
-    print('4. 更新本地对比图片（此功能未完善）')
-    print('5. 获取屏幕位置信息')
+def help(actions:list):
+    print('1. 更新本地对比图片')
+    print('2. 获取屏幕位置信息')
+    for i in range(len(actions)):
+        print(str(i+3) + '. ' + actions[i])
     print('0. 退出')
 
 def update():
@@ -239,3 +239,82 @@ def get_windows(window_hwnd,flag) -> Image.Image|None:
     except Exception as error:
         print("\r\nget_window error!!!\n",error)
         return None
+
+def identify(message:str, dst_img:Image.Image, tmp_img:Image.Image, area:dict, pos:list):
+    pixel_sum = [0,0,0]
+    # 预设画面：img_pixel
+    dst_img_pos_list = []
+    x,y = dst_img.size
+    x_1 = int(x * area["x_1"])
+    x_2 = int(x * area["x_2"])
+    y_1 = int(y * area["y_1"])
+    y_2 = int(y * area["y_2"])
+    for i in range(x_1, x_2, x_2 - x_1):
+        for j in range(y_1, y_2, y_2 - y_1):
+            dst_img_pos_list.append(dst_img.getpixel((i,j)))
+    # 实时画面色彩特征获取：tmp_pixel_list
+    tmp_pixel_list = []
+    x,y = tmp_img.size
+    x_1 = int(x * area["x_1"])
+    x_2 = int(x * area["x_2"])
+    y_1 = int(y * area["y_1"])
+    y_2 = int(y * area["y_2"])
+    for i in range(x_1, x_2, x_2 - x_1):
+        for j in range(y_1, y_2, y_2 - y_1):
+            tmp_pixel_list.append(tmp_img.getpixel((i,j)))        
+    length = min(len(tmp_pixel_list),len(dst_img_pos_list))
+    for i in range(length):
+        pixel_sum[0] += abs(tmp_pixel_list[i][0] - dst_img_pos_list[i][0])
+        pixel_sum[1] += abs(tmp_pixel_list[i][1] - dst_img_pos_list[i][1])
+        pixel_sum[2] += abs(tmp_pixel_list[i][2] - dst_img_pos_list[i][2])
+    # 判断颜色近似度
+    if abs(pixel_sum[0] / length) < 10 and abs(pixel_sum[1] / length) < 10 and abs(pixel_sum[2] / length) < 10:
+        message = '\r'+message+' '*20
+        print("\r"+message)
+        return True
+    else:
+        return False
+
+def action(action:dict):
+    count = input("准备刷多少次？")
+
+############################################################ 肝到这里了，该计算次数了，完事处理单次活动的各个动作识别处理
+
+    for i in choose:
+    i = ord(i)
+    result *= 10
+    result += i - 48
+    if i < 48 or i > 57:
+        print('对叭起, 我不认识它QAQ')
+        break
+    for i in action:
+        dst_img = Image.open(action[i]["img_path"])
+        window = get_windows(yys_window_hwnd,flag)
+
+
+        # 开始按钮：  1503/1579  790/887
+        tmp_pixel_list = tmp_img.getpixel((int(0.95 * x),int(0.8901 * y)))
+        # 体力消耗标识：  1464/1579  807-826 /887
+        wait_button_pixel_1 = tmp_img.getpixel((int(0.92717 * x),int(0.92108 * y)))
+        wait_button_pixel_2 = room_member_img.getpixel((int(0.92717 * img_x),int(0.92108 * img_y)))
+        wait_button_pixel = [
+            wait_button_pixel_1[0] - wait_button_pixel_2[0],
+            wait_button_pixel_1[1] - wait_button_pixel_2[1],
+            wait_button_pixel_1[2] - wait_button_pixel_2[2]
+        ]
+        if tmp_pixel_list[0] == tmp_pixel_list[1] and tmp_pixel_list[1] == tmp_pixel_list[2]:
+            print("\r等待成员中            ",end='')
+
+        elif abs(wait_button_pixel[0]) < 5 and abs(wait_button_pixel[1]) < 5 and abs(wait_button_pixel[2]) < 5:
+            print("\r等待房主中            ",end='')
+
+        else:
+            # 1480-1540 / 1579   762-820 / 887
+            x=rand_num(int(0.9373 * init_x),int(0.9653 * init_x))
+            y=rand_num(int(0.8791 * init_y),int(0.91446 * init_y))
+            
+            if flag % 2 == 1:
+                print("\n点击位置：",x,y)
+            mouse_click(yys_window_hwnd,int(x),int(y))
+            print("\r开始                        ",end='')
+            sleep(0.3)

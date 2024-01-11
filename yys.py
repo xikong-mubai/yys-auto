@@ -2,7 +2,7 @@
 # from ctypes import windll
 from sys import version_info,executable
 from util import sleep,windll,get_windows,rand_num,mouse_click,yys_window_name,init_window_pos,is_admin, \
-help ,check_windows,check_user,error_exit,get_system_dpi,Image,update
+help ,check_windows,check_user,error_exit,get_system_dpi,Image,update,json,action
 
 # 挖土
 def watu():
@@ -63,10 +63,14 @@ def watu():
         while True:
             tmp_img = get_windows(yys_window_hwnd,flag)
             # 判断是否在房间状态
+            # img (x1,x2,y1,y2) (x,y)
+            # 边界：  wait_x_left,wait_x
             pixel_sum = [0,0,0]
             img_pixel = []
+            # 预设画面：img_pixel
             for i in range(wait_x_left,wait_x,int((wait_x-wait_x_left)/9)):
                 img_pixel.append(room_img.getpixel((i,wait_y)))
+            # 实时画面色彩特征获取：tmp_pixel
             tmp_pixel = []
             for i in range(real_wait_x_left,real_wait_x,int((real_wait_x - real_wait_x_left)/9)):
                 tmp_pixel.append(tmp_img.getpixel((i,real_wait_y)))        
@@ -75,11 +79,12 @@ def watu():
                 pixel_sum[0] += abs(tmp_pixel[i][0] - img_pixel[i][0])
                 pixel_sum[1] += abs(tmp_pixel[i][1] - img_pixel[i][1])
                 pixel_sum[2] += abs(tmp_pixel[i][2] - img_pixel[i][2])
+            # 判断颜色近似度
             if abs(pixel_sum[0] / length) < 10 and abs(pixel_sum[1] / length) < 10 and abs(pixel_sum[2] / length) < 10:
                 result_flag = 0
-                # 1503/1579  790/887
+                # 开始按钮：  1503/1579  790/887
                 tmp_pixel = tmp_img.getpixel((int(0.95 * real_img_x),int(0.8901 * real_img_y)))
-                # 1464/1579  807-826 /887
+                # 体力消耗标识：  1464/1579  807-826 /887
                 wait_button_pixel_1 = tmp_img.getpixel((int(0.92717 * real_img_x),int(0.92108 * real_img_y)))
                 wait_button_pixel_2 = room_member_img.getpixel((int(0.92717 * img_x),int(0.92108 * img_y)))
                 wait_button_pixel = [
@@ -88,11 +93,11 @@ def watu():
                     wait_button_pixel_1[2] - wait_button_pixel_2[2]
                 ]
                 if tmp_pixel[0] == tmp_pixel[1] and tmp_pixel[1] == tmp_pixel[2]:
-                    print("\r等待成员中",end='')
+                    print("\r等待成员中            ",end='')
                     if flag & 2 == 2:
                         tmp_img.save('./img/room_wait.png')
                 elif abs(wait_button_pixel[0]) < 5 and abs(wait_button_pixel[1]) < 5 and abs(wait_button_pixel[2]) < 5:
-                    print("\r等待房主中",end='')
+                    print("\r等待房主中            ",end='')
                     if flag & 2 == 2:
                         tmp_img.save('./img/room_wait_member_1.png')
                 else:
@@ -103,7 +108,7 @@ def watu():
                     if flag % 2 == 1:
                         print("\n点击位置：",x,y)
                     mouse_click(yys_window_hwnd,int(x),int(y))
-                    print("\r开始",end='')
+                    print("\r开始                        ",end='')
                     sleep(0.3)
             
             # 判断是否是结束一阶段
@@ -127,7 +132,7 @@ def watu():
                 if flag % 2 == 1:
                     print("\n点击位置：",x,y)
                 mouse_click(yys_window_hwnd,int(x),int(y))
-                print("\r结算画面一阶段",end='')
+                print("\r结算画面一阶段            ",end='')
                 if flag & 2 == 2:
                     tmp_img.save('./img/war_end_1.png')
                 sleep(0.3)
@@ -152,7 +157,7 @@ def watu():
                 if flag % 2 == 1:
                     print("\n点击位置：",x,y)
                 mouse_click(yys_window_hwnd,int(x),int(y))
-                print("\r结算画面二阶段",end='')
+                print("\r结算画面二阶段            ",end='')
                 if flag & 2 == 2:
                     tmp_img.save('./img/war_end_2.png')
                 if result_flag == 0:
@@ -177,7 +182,7 @@ def watu():
             
             tmp_img.close()
         
-        print('\r这是第'+str(num)+'次',end='')
+        print('\r这是第'+str(num)+'次            ',end='')
 
     room_img.close()
     room_member_img.close()
@@ -329,7 +334,7 @@ def yuling():
         #     pyautogui.click(x=rand_num(int(0.923 * img_x),int(0.9615 * img_x)), y=rand_num(int(0.8551 * img_y),int(0.924 * img_y)))
         #     sleep(0.3)
 
-        print('\r这是第'+str(num)+'次',end='')
+        print('\r这是第'+str(num)+'次            ',end='')
     
     print("已结束！")
     print("刷了"+str(num)+"次")
@@ -432,9 +437,11 @@ if is_admin():
     init_window_pos(yys_window_hwnd,global_x,global_y)
     print("初始化窗口完成")
 
-    config_file = open('./config','a+',encoding='utf-8')
-    config_file.seek(0)
-    yys_name = config_file.read()
+    fp = open('./config.json','r',encoding='utf-8')
+    config = json.load(fp.read())
+    fp.close()
+
+    yys_name = config['user']
     if len(yys_name) != 0:
         choose = input("请确认 "+yys_name+" 是否为你的阴阳师昵称（y/n）：")
         if choose.lower() == 'y':
@@ -443,31 +450,41 @@ if is_admin():
             yys_name = input("请手动输入阴阳师用户名称：")
         else:
             print('请输入 y 或者 n。')
-            config_file.close()
             error_exit()
     else:
         yys_name = input("请手动输入阴阳师用户名称：")
-    config_file.truncate(0)
-    config_file.write(yys_name)
-    config_file.close()
+
+    config["user"] = yys_name
     if not check_user(yys_name):
         error_exit()
     
+    actions = []
+    for i in config["actions"]:
+        actions.append(i)
+
     while True:
-        help()
+        help(actions)
         choose = input('请选择模式：')
-        if choose == '1':
-            watu()
-        elif choose == '2':
-            yuling()
-        elif choose == '0':
+        if choose == '0':
             error_exit()
-        elif choose == "4":   # save_img
+        elif choose == '1':# save_img
             save_img()
-        elif choose == '5':   # debug
+            watu()
+        elif choose == '2':# debug
             flag |= 1
+            yuling()
         else:
-            print('对叭起, 我不认识它QAQ')
+            result = 0
+            for i in choose:
+                i = ord(i)
+                result *= 10
+                result += i - 48
+                if i < 48 or i > 57:
+                    print('对叭起, 我不认识它QAQ')
+                    break
+            else:
+                result -= 3
+                action(config["actions"][actions[result]])
 else:
     if version_info[0] == 3:
         windll.shell32.ShellExecuteW(None, "runas", executable, __file__, None, 1)

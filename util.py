@@ -8,6 +8,7 @@ from time import sleep
 from random import randint
 from numpy import array
 from os import system
+from yys import yys_window_hwnd,flag
 
 yys_window_name = "阴阳师-网易游戏"
 tempimg_name = "123.png"
@@ -270,51 +271,39 @@ def identify(message:str, dst_img:Image.Image, tmp_img:Image.Image, area:dict, p
     # 判断颜色近似度
     if abs(pixel_sum[0] / length) < 10 and abs(pixel_sum[1] / length) < 10 and abs(pixel_sum[2] / length) < 10:
         message = '\r'+message+' '*20
-        print("\r"+message)
+        print(message)
         return True
     else:
         return False
 
 def action(action:dict):
-    count = input("准备刷多少次？")
-
-############################################################ 肝到这里了，该计算次数了，完事处理单次活动的各个动作识别处理
-
-    for i in choose:
-    i = ord(i)
-    result *= 10
-    result += i - 48
-    if i < 48 or i > 57:
-        print('对叭起, 我不认识它QAQ')
-        break
-    for i in action:
-        dst_img = Image.open(action[i]["img_path"])
-        window = get_windows(yys_window_hwnd,flag)
-
-
-        # 开始按钮：  1503/1579  790/887
-        tmp_pixel_list = tmp_img.getpixel((int(0.95 * x),int(0.8901 * y)))
-        # 体力消耗标识：  1464/1579  807-826 /887
-        wait_button_pixel_1 = tmp_img.getpixel((int(0.92717 * x),int(0.92108 * y)))
-        wait_button_pixel_2 = room_member_img.getpixel((int(0.92717 * img_x),int(0.92108 * img_y)))
-        wait_button_pixel = [
-            wait_button_pixel_1[0] - wait_button_pixel_2[0],
-            wait_button_pixel_1[1] - wait_button_pixel_2[1],
-            wait_button_pixel_1[2] - wait_button_pixel_2[2]
-        ]
-        if tmp_pixel_list[0] == tmp_pixel_list[1] and tmp_pixel_list[1] == tmp_pixel_list[2]:
-            print("\r等待成员中            ",end='')
-
-        elif abs(wait_button_pixel[0]) < 5 and abs(wait_button_pixel[1]) < 5 and abs(wait_button_pixel[2]) < 5:
-            print("\r等待房主中            ",end='')
-
+    result = 0
+    while True:
+        count = input("准备刷多少次？")
+        for i in count:
+            i = ord(i)
+            result *= 10
+            result += i - 48
+            if i < 48 or i > 57:
+                print('对叭起, 我不认识它QAQ')
+                break
         else:
-            # 1480-1540 / 1579   762-820 / 887
-            x=rand_num(int(0.9373 * init_x),int(0.9653 * init_x))
-            y=rand_num(int(0.8791 * init_y),int(0.91446 * init_y))
-            
-            if flag % 2 == 1:
-                print("\n点击位置：",x,y)
-            mouse_click(yys_window_hwnd,int(x),int(y))
-            print("\r开始                        ",end='')
-            sleep(0.3)
+            result = 0
+            break
+    
+    for _ in range(result):
+        for i in action:
+            dst_img = Image.open(action[i]["img_path"])
+            window = get_windows(yys_window_hwnd,flag)
+
+            if identify(action[i]["message"],dst_img,window,action[i]["area"],action[i]["pos"])
+
+                # 1480-1540 / 1579   762-820 / 887
+                x=rand_num(int(0.9373 * init_x),int(0.9653 * init_x))
+                y=rand_num(int(0.8791 * init_y),int(0.91446 * init_y))
+                
+                if flag % 2 == 1:
+                    print("\n点击位置：",x,y)
+                mouse_click(yys_window_hwnd,int(x),int(y))
+                print("\r开始                        ",end='')
+                sleep(0.3)

@@ -6,7 +6,7 @@ block_cipher = None
 
 a = Analysis(
     ['yys.py'],
-    pathex=['.\\util.py'],
+    pathex=['.\\util.py','.\\config.py'],
     binaries=[],
     datas=[],
     hiddenimports=[],

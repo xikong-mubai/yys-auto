@@ -1,0 +1,9 @@
+img/
+img
+img*
+img*/*
+img*/*/*
+build/
+dist/
+build
+dist

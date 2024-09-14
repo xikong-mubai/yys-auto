@@ -8,7 +8,7 @@ from time import sleep
 from random import randint
 from numpy import array
 from os import system
-from yys import yys_window_hwnd,flag
+import config
 
 yys_window_name = "阴阳师-网易游戏"
 tempimg_name = "123.png"
@@ -206,6 +206,8 @@ def get_windows(window_hwnd,flag) -> Image.Image|None:
             print("\n实际屏幕显示位置",rect.left, rect.top,rect.right , rect.bottom)
             print("系统记录位置",left, top, right, bottom)
         if left < 0 or top < 0:
+            print("\n实际屏幕显示位置",rect.left, rect.top,rect.right , rect.bottom)
+            print("系统记录位置",left, top, right, bottom)
             print("\a\n请把目标窗口打开至桌面（不能最小化）")
 
         # 根据句柄创建一个DC
@@ -241,69 +243,76 @@ def get_windows(window_hwnd,flag) -> Image.Image|None:
         print("\r\nget_window error!!!\n",error)
         return None
 
-def identify(message:str, dst_img:Image.Image, tmp_img:Image.Image, area:dict, pos:list):
+def get_img_pixel_list(img:Image.Image,check_area:list):
+    img_pixel_list = []
+    x,y = img.size
+    x_1 = int(x * check_area[0])
+    x_2 = int(x * check_area[1])
+    y_1 = int(y * check_area[2])
+    y_2 = int(y * check_area[3])
+    x = 0 ; sum_x = (x_2 - x_1)/9
+    while x < x_2:
+        if x == 0:
+            x = x_1
+        y = 0 ; sum_y = (y_2-y_1)/9
+        while y < y_2:
+            if y == 0:
+                y = y_1
+            img_pixel_list.append(img.getpixel((x,y)))
+            y += sum_y
+        x += sum_x
+    return img_pixel_list
+
+def identify(dst_img:Image.Image, tmp_img:Image.Image, check_area:list, check_pos:list):
     pixel_sum = [0,0,0]
     # 预设画面：img_pixel
-    dst_img_pos_list = []
-    x,y = dst_img.size
-    x_1 = int(x * area["x_1"])
-    x_2 = int(x * area["x_2"])
-    y_1 = int(y * area["y_1"])
-    y_2 = int(y * area["y_2"])
-    for i in range(x_1, x_2, x_2 - x_1):
-        for j in range(y_1, y_2, y_2 - y_1):
-            dst_img_pos_list.append(dst_img.getpixel((i,j)))
+    dst_img_pixel_list = get_img_pixel_list(dst_img,check_area) if len(check_pos) == 0 else get_img_pixel_list(dst_img,check_pos)
     # 实时画面色彩特征获取：tmp_pixel_list
-    tmp_pixel_list = []
-    x,y = tmp_img.size
-    x_1 = int(x * area["x_1"])
-    x_2 = int(x * area["x_2"])
-    y_1 = int(y * area["y_1"])
-    y_2 = int(y * area["y_2"])
-    for i in range(x_1, x_2, x_2 - x_1):
-        for j in range(y_1, y_2, y_2 - y_1):
-            tmp_pixel_list.append(tmp_img.getpixel((i,j)))        
-    length = min(len(tmp_pixel_list),len(dst_img_pos_list))
+    tmp_pixel_list = get_img_pixel_list(tmp_img,check_area) if len(check_pos) == 0 else get_img_pixel_list(tmp_img,check_pos)
+    length = min(len(tmp_pixel_list),len(dst_img_pixel_list))
     for i in range(length):
-        pixel_sum[0] += abs(tmp_pixel_list[i][0] - dst_img_pos_list[i][0])
-        pixel_sum[1] += abs(tmp_pixel_list[i][1] - dst_img_pos_list[i][1])
-        pixel_sum[2] += abs(tmp_pixel_list[i][2] - dst_img_pos_list[i][2])
+        pixel_sum[0] += abs(tmp_pixel_list[i][0] - dst_img_pixel_list[i][0])
+        pixel_sum[1] += abs(tmp_pixel_list[i][1] - dst_img_pixel_list[i][1])
+        pixel_sum[2] += abs(tmp_pixel_list[i][2] - dst_img_pixel_list[i][2])
     # 判断颜色近似度
+    print(pixel_sum)
     if abs(pixel_sum[0] / length) < 10 and abs(pixel_sum[1] / length) < 10 and abs(pixel_sum[2] / length) < 10:
-        message = '\r'+message+' '*20
-        print(message)
         return True
     else:
         return False
 
 def action(action:dict):
-    result = 0
+    count = 0
     while True:
         count = input("准备刷多少次？")
-        for i in count:
-            i = ord(i)
-            result *= 10
-            result += i - 48
-            if i < 48 or i > 57:
-                print('对叭起, 我不认识它QAQ')
-                break
-        else:
-            result = 0
+        if count.isdigit():
+            count = int(count)
             break
-    
-    for _ in range(result):
+    dst_img_list = {}
+    for i in action:
+        dst_img_list[i] = Image.open(action[i]["img_path"])
+
+    flag = 0
+    while count > 0:
         for i in action:
-            dst_img = Image.open(action[i]["img_path"])
-            window = get_windows(yys_window_hwnd,flag)
+            window = get_windows(config.yys_window_hwnd,config.mode_flag)
 
-            if identify(action[i]["message"],dst_img,window,action[i]["area"],action[i]["pos"])
-
+            if identify(dst_img_list[i],window,action[i]["check_area"],action[i]["check_pos"]):
+                print("\r"+action[i]["message"]+"                           ",end='')
+                if action[i]["type"] == 0:
+                    flag = 0
+                elif action[i]["type"] == 1:
+                    if flag == 0:
+                        count -= 1
+                        flag = 1
+                if len(action[i]["click_area"]) == 0:
+                    continue
                 # 1480-1540 / 1579   762-820 / 887
-                x=rand_num(int(0.9373 * init_x),int(0.9653 * init_x))
-                y=rand_num(int(0.8791 * init_y),int(0.91446 * init_y))
+                x_left,x_right,y_left,y_right = action[i]["click_area"]
+                x=rand_num(int(x_left * config.global_x),int(x_right * config.global_x))
+                y=rand_num(int(y_left * config.global_y),int(y_right * config.global_y))
                 
-                if flag % 2 == 1:
+                if config.mode_flag % 2 == 1:
                     print("\n点击位置：",x,y)
-                mouse_click(yys_window_hwnd,int(x),int(y))
-                print("\r开始                        ",end='')
+                mouse_click(config.yys_window_hwnd,int(x),int(y))
                 sleep(0.3)

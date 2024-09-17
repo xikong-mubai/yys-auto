@@ -345,41 +345,17 @@ def yuling():
     print()
 
 def save_img():
-    print("请将游戏运行至对应画面的时刻，然后输入 1 进行画面截取确认。不需要重新截取的时刻输入 0 跳过")
-    choose = input("房主等待，房间成员未进入之前。确认后截取（房间成员等待房主邀请请输入2）：").strip()
-    window = get_windows(config.yys_window_hwnd,mode_flag)
-    if choose == '1':
-        window.save('./img/room_wait.png')
-    elif choose == '2':
-        window.save('./img/room_wait_member_1.png')
-    choose = input("结算时的数据统计画面。确认后截取：").strip()
-    window = get_windows(config.yys_window_hwnd,mode_flag)
-    if choose == '1':
-        window.save('./img/war_end_1.png')
-    choose = input("结算时的奖励界面。确认后截取：").strip()
-    window = get_windows(config.yys_window_hwnd,mode_flag)
-    if choose == '1':
-        window.save('./img/war_end_2.png')
-
-    choose = input("请确认是否截取御灵画面（y/n）：").strip()
-    if choose == 'y':
-        choose = input("按照工作日时间选择需要截取的御灵画面（2、3、4、5）：").strip()
-        yuling_path = './img/yuling_'+choose
-    else:
-        return 
-
-    choose = input("点击挑战的界面。确认后截取：").strip()
-    window = get_windows(config.yys_window_hwnd,mode_flag)
-    if choose == '1':
-        window.save(yuling_path+'/yuling_start.png')
-    choose = input("结算时的数据统计画面。确认后截取：").strip()
-    window = get_windows(config.yys_window_hwnd,mode_flag)
-    if choose == '1':
-        window.save(yuling_path+'/yuling_end_1.png')
-    choose = input("结算时的奖励界面。确认后截取：").strip()
-    window = get_windows(config.yys_window_hwnd,mode_flag)
-    if choose == '1':
-        window.save(yuling_path+'/yuling_end_2.png')
+    num = 0
+    while True:
+        choose = input("请将游戏运行至想要截取的画面，然后输入 1 进行画面截取。输入 0 返回主菜单")
+        if choose == '0':
+            return
+        elif choose == '1':
+            window = get_windows(config.yys_window_hwnd,mode_flag)
+            window.save('./img/tmp_'+str(num)+".png")
+            num += 1
+            window.close()
+        
 # ctypes.windll.shcore.SetProcessDpiAwareness(2)
 # yys_path = input("请输入阴阳师程序路径：")
 # os.system(yys_path)
@@ -417,22 +393,24 @@ if __name__ == "__main__":
         config.yys_window_hwnd = windows[choose][0]
 
         print("当前目标窗口dpi及其dpi感知级别：",end='')
-        dpi,a = get_system_dpi(config.yys_window_hwnd)
-        print(dpi,a)
+        config.dst_dpi,config.dst_a = get_system_dpi(config.yys_window_hwnd)
+        print(config.dst_dpi,config.dst_a)
         print("当前窗口dpi及其dpi感知级别：",end='')
-        dpi,a = get_system_dpi(0)
-        print(dpi,a)
+        config.sys_dpi,config.sys_a = get_system_dpi(0)
+        print(config.sys_dpi,config.sys_a)
 
         # img_x,img_y = 1180,702
         # img_x,img_y = img_x + int(22/dpi),img_y + int((45+2+10)/dpi)# 769 462 # dpi为 1.5 时，等比放大后即为 1131 636
         # init_x,init_y = 754,424 # 预设画面宽高
-        if a == -1 or a == 0:
+        if config.dst_a == -1 and config.sys_a == 0:
             mode_flag |= 4
-            chang_x,chang_y = 22/dpi,57/dpi
-            config.global_x = config.init_x + int(chang_x)
-            config.global_x = config.global_x + 1 if chang_x - int(chang_x) > 0 else config.global_x
-            config.global_y = config.init_y + int(chang_y)
-            config.global_y = config.global_y + 1 if chang_y - int(chang_y) > 0 else config.global_y  
+            dpi = (config.dst_dpi*config.sys_dpi)
+            config.dpi = dpi
+            config.chang_x,config.chang_y = config.chang_x/dpi,config.chang_y/dpi
+            config.chang_x = int(config.chang_x) +1 if config.chang_x - int(config.chang_x) > 0 else int(config.chang_x)
+            config.chang_y = int(config.chang_y) +1 if config.chang_y - int(config.chang_y) > 0 else int(config.chang_y)
+            config.global_x = config.init_x + config.chang_x
+            config.global_y = config.init_y + config.chang_y
         else:
             config.global_x = config.init_x + 22
             config.global_y = config.init_y + 57

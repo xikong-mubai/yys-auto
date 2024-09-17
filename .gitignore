@@ -6,4 +6,9 @@ img*/*/*
 build/
 dist/
 build
+build*
+build*/
+build/*
 dist
+yys.exe
+dist/yys.exe

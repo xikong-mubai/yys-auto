@@ -139,6 +139,11 @@ if __name__=="__main__":
 
 def mouse_click(window_hwnd,x,y):
     try:
+        x += config.chang_x//2
+        tmp_y = config.chang_y+(35/config.sys_dpi)
+        y += int(tmp_y//2)
+        if config.mode_flag % 2 == 1:
+            print(x,y)
         win32api.SendMessage(window_hwnd,win32con.WM_LBUTTONDOWN,0,(y << 16)+x)
         win32api.SendMessage(window_hwnd,win32con.WM_LBUTTONUP,0,(y << 16)+x)
     except Exception as e:
@@ -263,20 +268,36 @@ def get_img_pixel_list(img:Image.Image,check_area:list):
         x += sum_x
     return img_pixel_list
 
-def identify(dst_img:Image.Image, tmp_img:Image.Image, check_area:list, check_pos:list):
+def get_pixel_feature(pixel_list:list):
+    tmp_pixel = [0,0,0]
+    for i in pixel_list:
+        tmp_pixel[0] += i[0]
+        tmp_pixel[1] += i[1]
+        tmp_pixel[2] += i[2]
+    tmp_len = len(pixel_list)
+    tmp_pixel[0] //= tmp_len
+    tmp_pixel[1] //= tmp_len
+    tmp_pixel[2] //= tmp_len
+    return tmp_pixel
+
+def identify(dst_pixel_list, tmp_img:Image.Image, check_area:list, check_pos:list):
     pixel_sum = [0,0,0]
     # 预设画面：img_pixel
-    dst_img_pixel_list = get_img_pixel_list(dst_img,check_area) if len(check_pos) == 0 else get_img_pixel_list(dst_img,check_pos)
     # 实时画面色彩特征获取：tmp_pixel_list
     tmp_pixel_list = get_img_pixel_list(tmp_img,check_area) if len(check_pos) == 0 else get_img_pixel_list(tmp_img,check_pos)
-    length = min(len(tmp_pixel_list),len(dst_img_pixel_list))
-    for i in range(length):
-        pixel_sum[0] += abs(tmp_pixel_list[i][0] - dst_img_pixel_list[i][0])
-        pixel_sum[1] += abs(tmp_pixel_list[i][1] - dst_img_pixel_list[i][1])
-        pixel_sum[2] += abs(tmp_pixel_list[i][2] - dst_img_pixel_list[i][2])
+    # tmp_pixel = get_pixel_feature(tmp_pixel_list)
+    tmp_len = len(tmp_pixel_list)
+    for i in range(tmp_len):
+        pixel_sum[0] += abs(tmp_pixel_list[i][0] - dst_pixel_list[i][0])
+        pixel_sum[1] += abs(tmp_pixel_list[i][1] - dst_pixel_list[i][1])
+        pixel_sum[2] += abs(tmp_pixel_list[i][2] - dst_pixel_list[i][2])
+    pixel_sum[0] /= tmp_len
+    pixel_sum[1] /= tmp_len
+    pixel_sum[2] /= tmp_len
     # 判断颜色近似度
-    print(pixel_sum)
-    if abs(pixel_sum[0] / length) < 10 and abs(pixel_sum[1] / length) < 10 and abs(pixel_sum[2] / length) < 10:
+    if config.mode_flag %2 ==1:
+        print(pixel_sum)
+    if pixel_sum[0] <= 10 and pixel_sum[0] >= 0 and pixel_sum[1] <= 10 and pixel_sum[1] >= 0 and pixel_sum[2] <= 10 and pixel_sum[2] >= 0:
         return True
     else:
         return False
@@ -288,16 +309,17 @@ def action(action:dict):
         if count.isdigit():
             count = int(count)
             break
-    dst_img_list = {}
+    dst_pixel_list = {}
     for i in action:
-        dst_img_list[i] = Image.open(action[i]["img_path"])
+        tmp_pixel_list = get_img_pixel_list(Image.open(action[i]["img_path"]),action[i]["check_area"]) if len(action[i]["check_pos"]) == 0 else get_img_pixel_list(Image.open(action[i]["img_path"]),action[i]["check_pos"])
+        dst_pixel_list[i] = tmp_pixel_list#get_pixel_feature(tmp_pixel_list)
 
     flag = 0
     while count > 0:
         for i in action:
             window = get_windows(config.yys_window_hwnd,config.mode_flag)
 
-            if identify(dst_img_list[i],window,action[i]["check_area"],action[i]["check_pos"]):
+            if identify(dst_pixel_list[i],window,action[i]["check_area"],action[i]["check_pos"]):
                 print("\r"+action[i]["message"]+"                           ",end='')
                 if action[i]["type"] == 0:
                     flag = 0
@@ -309,8 +331,8 @@ def action(action:dict):
                     continue
                 # 1480-1540 / 1579   762-820 / 887
                 x_left,x_right,y_left,y_right = action[i]["click_area"]
-                x=rand_num(int(x_left * config.global_x),int(x_right * config.global_x))
-                y=rand_num(int(y_left * config.global_y),int(y_right * config.global_y))
+                x=rand_num(int(x_left * config.init_x),int(x_right * config.init_x))
+                y=rand_num(int(y_left * config.init_y),int(y_right * config.init_y))
                 
                 if config.mode_flag % 2 == 1:
                     print("\n点击位置：",x,y)

@@ -320,7 +320,7 @@ def action(action:dict):
         window = get_windows(config.yys_window_hwnd,config.mode_flag)
         for i in action:
             if identify(dst_pixel_list[i],window,action[i]["check_area"],action[i]["check_pos"]):
-                print("\r"+action[i]["message"]+"                           ",end='')
+                print("\r"+action[i]["message"]+"    \t      \t      \t还剩余"+str(count)+"次\t",end='')
                 if action[i]["type"] == 0:
                     flag = 0
                 elif action[i]["type"] == 1:

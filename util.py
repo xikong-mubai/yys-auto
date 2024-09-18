@@ -316,9 +316,9 @@ def action(action:dict):
 
     flag = 0
     while count > 0:
+        
+        window = get_windows(config.yys_window_hwnd,config.mode_flag)
         for i in action:
-            window = get_windows(config.yys_window_hwnd,config.mode_flag)
-
             if identify(dst_pixel_list[i],window,action[i]["check_area"],action[i]["check_pos"]):
                 print("\r"+action[i]["message"]+"                           ",end='')
                 if action[i]["type"] == 0:

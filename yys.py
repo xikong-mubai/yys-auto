@@ -210,18 +210,14 @@ if __name__ == "__main__":
         # img_x,img_y = 1180,702
         # img_x,img_y = img_x + int(22/dpi),img_y + int((45+2+10)/dpi)# 769 462 # dpi为 1.5 时，等比放大后即为 1131 636
         # init_x,init_y = 754,424 # 预设画面宽高
-        if config.dst_a == -1 and config.sys_a == 0:
-            mode_flag |= 4
-            dpi = (config.dst_dpi*config.sys_dpi)
-            config.dpi = dpi
-            config.chang_x,config.chang_y = config.chang_x/dpi,config.chang_y/dpi
-            config.chang_x = int(config.chang_x) +1 if config.chang_x - int(config.chang_x) > 0 else int(config.chang_x)
-            config.chang_y = int(config.chang_y) +1 if config.chang_y - int(config.chang_y) > 0 else int(config.chang_y)
-            config.global_x = config.init_x + config.chang_x
-            config.global_y = config.init_y + config.chang_y
-        else:
-            config.global_x = config.init_x + 22
-            config.global_y = config.init_y + 57
+        mode_flag |= 4
+        dpi = (config.dst_dpi*config.sys_dpi)
+        config.dpi = dpi
+        config.chang_bordering,config.chang_top = int(config.chang_bordering*dpi),int(config.chang_top*dpi)
+        # config.chang_bordering = int(config.chang_bordering) +1 if config.chang_bordering - int(config.chang_bordering) > 0 else int(config.chang_bordering)
+        # config.chang_top = int(config.chang_top) +1 if config.chang_top - int(config.chang_top) > 0 else int(config.chang_top)
+        config.global_x = config.init_x + config.chang_bordering * 2 + 2
+        config.global_y = config.init_y + config.chang_top + config.chang_bordering + 2
 
         print("预设窗口宽高为：",config.global_x,config.global_y)
         print("初始化窗口位置...")

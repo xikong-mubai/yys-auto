@@ -14,7 +14,7 @@
             "2": {
                 "name": "room_owner_wait",
                 "message": "等待开始",
-                "img_path": "./img/hs/room_wait_1.png",
+                "img_path": "./img/hw/room_wait_1.png",
                 "check_area": [0.50, 0.70, 0.82547, 0.82547],
                 "check_pos":[0.95,0.95, 0.8901, 0.8901],
                 "click_area":[0.9373, 0.9653, 0.8791, 0.91446],
@@ -23,7 +23,7 @@
             "3": {
                 "name": "room_member_wait",
                 "message": "等待房主中",
-                "img_path": "./img/hw/room_wait_member_1.png",
+                "img_path": "./img/hw/room_wait_member.png",
                 "check_area": [0.50, 0.70, 0.82547, 0.82547],
                 "check_pos": [0.92717,0.92717, 0.92108, 0.92108],
                 "click_area":[],
@@ -42,6 +42,53 @@
                 "name": "finish_result_2",
                 "message": "结算画面二阶段",
                 "img_path": "./img/hw/war_end_2.png",
+                "check_area": [0.0107,0.9893,0.879,0.879],
+                "check_pos":[],
+                "click_area":[0.87,0.93,0.85,0.93],
+                "type": 1
+            }
+        },
+        "魂土(双人版)": {
+            "1": {
+                "name": "room_owner_wait",
+                "message": "等待成员中",
+                "img_path": "./img/wt/room_wait.png",
+                "check_area": [0.50, 0.70, 0.82547, 0.82547],
+                "check_pos":[0.95,0.95, 0.8901, 0.8901],
+                "click_area":[],
+                "type": 0
+            },
+            "2": {
+                "name": "room_owner_wait",
+                "message": "等待开始",
+                "img_path": "./img/wt/room_wait_1.png",
+                "check_area": [0.50, 0.70, 0.82547, 0.82547],
+                "check_pos":[0.95,0.95, 0.8901, 0.8901],
+                "click_area":[0.9373, 0.9653, 0.8791, 0.91446],
+                "type": 0
+            },
+            "3": {
+                "name": "room_member_wait",
+                "message": "等待房主中",
+                "img_path": "./img/wt/room_wait_member.png",
+                "check_area": [0.50, 0.70, 0.82547, 0.82547],
+                "check_pos": [0.92717,0.92717, 0.92108, 0.92108],
+                "click_area":[],
+                "type": 0
+            },
+            "4": {
+                "name": "finish_result_1",
+                "message": "结算画面一阶段",
+                "img_path": "./img/wt/war_end_1.png",
+                "check_area": [0.0107,0.9893,0.879,0.879],
+                "check_pos":[],
+                "click_area":[0.87,0.93,0.85,0.93],
+                "type": 2
+            },
+            "5": {
+                "name": "finish_result_2",
+                "message": "结算画面二阶段",
+                "img_path": "./img/wt/war_end_2.png",
                 "check_area": [0.0107,0.9893,0.879,0.879],
                 "check_pos":[],
                 "click_area":[0.87,0.93,0.85,0.93],
@@ -70,7 +117,7 @@
             "3": {
                 "name": "room_member_wait",
                 "message": "等待房主中",
-                "img_path": "./img/hs/room_wait_member_1.png",
+                "img_path": "./img/hs/room_wait_member.png",
                 "check_area": [0.50, 0.70,  0.82547, 0.82547],
                 "check_pos": [0.92717,0.92717, 0.92108, 0.92108],
                 "click_area":[],
@@ -108,7 +155,7 @@
             "2": {
                 "name": "room_owner_wait",
                 "message": "等待开始",
-                "img_path": "./img/hs/room_wait_1.png",
+                "img_path": "./img/hw/room_wait_1.png",
                 "check_area": [0.50, 0.70, 0.82547, 0.82547],
                 "check_pos":[],
                 "click_area":[0.9373, 0.9653, 0.8791, 0.91446],
@@ -117,7 +164,7 @@
             "3": {
                 "name": "room_member_wait",
                 "message": "等待房主中",
-                "img_path": "./img/hw/room_wait_member_1.png",
+                "img_path": "./img/hw/room_wait_member.png",
                 "check_area": [0.50, 0.70, 0.82547, 0.82547],
                 "check_pos": [0.92717,0.92717, 0.92108, 0.92108],
                 "click_area":[],
@@ -164,7 +211,7 @@
             "3": {
                 "name": "room_member_wait",
                 "message": "等待房主中",
-                "img_path": "./img/hs/room_wait_member_1.png",
+                "img_path": "./img/hs/room_wait_member.png",
                 "check_area": [0.50, 0.70,  0.82547, 0.82547],
                 "check_pos": [0.92717,0.92717, 0.92108, 0.92108],
                 "click_area":[],

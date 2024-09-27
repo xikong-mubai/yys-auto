@@ -64,7 +64,12 @@ def rand_num(x:int, y:int):
 def get_system_dpi(window_hwnd):
     """获取缩放后的分辨率"""
     #windll.shcore.SetProcessDpiAwareness(0)
-    
+
+    PROCESS_DPI_AWARENESS = {
+        "PROCESS_DPI_UNAWARE" : 0,          # DPI 不知道。 此应用不会缩放 DPI 更改，并且始终假定其比例系数为 100% (96 DPI) 。 系统将在任何其他 DPI 设置上自动缩放它。
+        "PROCESS_SYSTEM_DPI_AWARE" : 1,     # 系统 DPI 感知。 此应用不会缩放 DPI 更改。 它将查询 DPI 一次，并在应用的生存期内使用该值。 如果 DPI 发生更改，应用将不会调整为新的 DPI 值。 当 DPI 与系统值发生更改时，系统会自动纵向扩展或缩减它。
+        "PROCESS_PER_MONITOR_DPI_AWARE" : 2 # 按显示器 DPI 感知。 此应用在创建 DPI 时检查 DPI，并在 DPI 发生更改时调整比例系数。 系统不会自动缩放这些应用程序。 
+    }
     hdc = win32gui.GetDC(window_hwnd)
     a = wintypes.DWORD()
     windll.shcore.GetProcessDpiAwareness(window_hwnd,byref(a))
@@ -139,9 +144,8 @@ if __name__=="__main__":
 
 def mouse_click(window_hwnd,x,y):
     try:
-        x += config.chang_x//2
-        tmp_y = config.chang_y+(35/config.sys_dpi)
-        y += int(tmp_y//2)
+        x += config.chang_bordering + 1
+        y += config.chang_top + 1
         if config.mode_flag % 2 == 1:
             print(x,y)
         win32api.SendMessage(window_hwnd,win32con.WM_LBUTTONDOWN,0,(y << 16)+x)
@@ -202,7 +206,7 @@ def get_windows(window_hwnd,flag) -> Image.Image|None:
                 byref(rect),
                 sizeof(rect)
             )
-            width,height = rect.right - rect.left - 2, rect.bottom - rect.top - 45 - 2
+            width,height = rect.right - rect.left - 1, rect.bottom - rect.top - config.chang_top - 1
         else:      
             width,height = (0,0)
 
@@ -226,7 +230,7 @@ def get_windows(window_hwnd,flag) -> Image.Image|None:
         saveBitmap.CreateCompatibleBitmap(newhdDC, width, height)
         saveDC.SelectObject(saveBitmap)
         sleep(0.3)
-        saveDC.BitBlt((0, 0), (width, height), newhdDC,(11,45+1), win32con.SRCCOPY) #(rect.left+1,rect.top+45+1), win32con.SRCCOPY)#(left, top), win32con.SRCCOPY)
+        saveDC.BitBlt((0, 0), (width, height), newhdDC,(config.chang_bordering+1,config.chang_top+1), win32con.SRCCOPY) #(rect.left+1,rect.top+45+1), win32con.SRCCOPY)#(left, top), win32con.SRCCOPY)
         sleep(0.3)
         info = saveBitmap.GetInfo()
         result = saveBitmap.GetBitmapBits(win32con.DIB_RGB_COLORS)

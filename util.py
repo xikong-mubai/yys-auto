@@ -3,7 +3,7 @@ from PIL import Image
 # 获取权限
 from ctypes import windll,wintypes,byref,sizeof
 from sys import exit
-import socket,json
+import socket
 from time import sleep
 from random import randint
 from numpy import array
@@ -16,8 +16,9 @@ tempimg_name = "123.png"
 def help(actions:list):
     print('1. 更新本地对比图片')
     print('2. 获取屏幕位置信息')
+    print('3. 尝试绘卷')
     for i in range(len(actions)):
-        print(str(i+3) + '. ' + actions[i])
+        print(str(i+4) + '. ' + actions[i])
     print('0. 退出')
 
 def update():
@@ -64,7 +65,6 @@ def rand_num(x:int, y:int):
 def get_system_dpi(window_hwnd):
     """获取缩放后的分辨率"""
     #windll.shcore.SetProcessDpiAwareness(0)
-
     PROCESS_DPI_AWARENESS = {
         "PROCESS_DPI_UNAWARE" : 0,          # DPI 不知道。 此应用不会缩放 DPI 更改，并且始终假定其比例系数为 100% (96 DPI) 。 系统将在任何其他 DPI 设置上自动缩放它。
         "PROCESS_SYSTEM_DPI_AWARE" : 1,     # 系统 DPI 感知。 此应用不会缩放 DPI 更改。 它将查询 DPI 一次，并在应用的生存期内使用该值。 如果 DPI 发生更改，应用将不会调整为新的 DPI 值。 当 DPI 与系统值发生更改时，系统会自动纵向扩展或缩减它。
@@ -142,10 +142,15 @@ if __name__=="__main__":
     check_windows("阴阳师-网易游戏")
     #print(win32process.GetWindowThreadProcessId(131592))
 
-def mouse_click(window_hwnd,x,y):
+def mouse_click(window_hwnd,position:list):
+    x_left,x_right,y_left,y_right = position
+    x=rand_num(int(x_left * config.init_x),int(x_right * config.init_x))
+    y=rand_num(int(y_left * config.init_y),int(y_right * config.init_y))
+    if config.mode_flag % 2 == 1:
+        print("\n点击位置：",x,y)
     try:
-        x += config.chang_bordering + 1
-        y += config.chang_top + 1
+        # x += config.chang_bordering + 1
+        # y += config.chang_top + 1
         if config.mode_flag % 2 == 1:
             print(x,y)
         win32api.SendMessage(window_hwnd,win32con.WM_LBUTTONDOWN,0,(y << 16)+x)
@@ -175,7 +180,7 @@ def mouse_click(window_hwnd,x,y):
 
 
 # 获取阴阳师运行状态
-def get_windows(window_hwnd,flag) -> Image.Image|None:
+def get_windows(window_hwnd) -> Image.Image|None:
     try:
         # time.sleep(0.3)
         # pythoncom.CoInitialize()
@@ -206,12 +211,12 @@ def get_windows(window_hwnd,flag) -> Image.Image|None:
                 byref(rect),
                 sizeof(rect)
             )
-            width,height = rect.right - rect.left - 1, rect.bottom - rect.top - config.chang_top - 1
+            width,height = rect.right - rect.left - 2, rect.bottom - rect.top - config.chang_top - 1
         else:      
             width,height = (0,0)
 
         left, top, right, bottom = win32gui.GetWindowRect(window_hwnd)
-        if flag % 2 == 1:
+        if config.mode_flag % 2 == 1:
             print("\n实际屏幕显示位置",rect.left, rect.top,rect.right , rect.bottom)
             print("系统记录位置",left, top, right, bottom)
         if left < 0 or top < 0:
@@ -289,7 +294,6 @@ def identify(dst_pixel_list, tmp_img:Image.Image, check_area:list, check_pos:lis
     # 预设画面：img_pixel
     # 实时画面色彩特征获取：tmp_pixel_list
     tmp_pixel_list = get_img_pixel_list(tmp_img,check_area) if len(check_pos) == 0 else get_img_pixel_list(tmp_img,check_pos)
-    # tmp_pixel = get_pixel_feature(tmp_pixel_list)
     tmp_len = len(tmp_pixel_list)
     for i in range(tmp_len):
         pixel_sum[0] += abs(tmp_pixel_list[i][0] - dst_pixel_list[i][0])
@@ -301,7 +305,7 @@ def identify(dst_pixel_list, tmp_img:Image.Image, check_area:list, check_pos:lis
     # 判断颜色近似度
     if config.mode_flag %2 ==1:
         print(pixel_sum)
-    if pixel_sum[0] <= 10 and pixel_sum[0] >= 0 and pixel_sum[1] <= 10 and pixel_sum[1] >= 0 and pixel_sum[2] <= 10 and pixel_sum[2] >= 0:
+    if pixel_sum[0] <= 6 and pixel_sum[0] >= 0 and pixel_sum[1] <= 6 and pixel_sum[1] >= 0 and pixel_sum[2] <= 6 and pixel_sum[2] >= 0:
         return True
     else:
         return False
@@ -320,25 +324,18 @@ def action(action:dict):
 
     flag = 0
     while count > 0:
-        
-        window = get_windows(config.yys_window_hwnd,config.mode_flag)
+        window = get_windows(config.yys_window_hwnd)
         for i in action:
             if identify(dst_pixel_list[i],window,action[i]["check_area"],action[i]["check_pos"]):
                 print("\r"+action[i]["message"]+"    \t      \t      \t还剩余"+str(count)+"次\t",end='')
                 if action[i]["type"] == 0:
                     flag = 0
-                elif action[i]["type"] == 1:
-                    if flag == 0:
-                        count -= 1
-                        flag = 1
+                elif action[i]["type"] == 1 and flag == 0:
+                    count -= 1
+                    flag = 1
                 if len(action[i]["click_area"]) == 0:
                     continue
                 # 1480-1540 / 1579   762-820 / 887
                 x_left,x_right,y_left,y_right = action[i]["click_area"]
-                x=rand_num(int(x_left * config.init_x),int(x_right * config.init_x))
-                y=rand_num(int(y_left * config.init_y),int(y_right * config.init_y))
-                
-                if config.mode_flag % 2 == 1:
-                    print("\n点击位置：",x,y)
-                mouse_click(config.yys_window_hwnd,int(x),int(y))
+                mouse_click(config.yys_window_hwnd,[x_left,x_right,y_left,y_right])
                 sleep(0.3)

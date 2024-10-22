@@ -8,3 +8,23 @@ global_x = 0
 global_y = 0
 chang_bordering,chang_top = 7,30# 22,57
 init_x,init_y = 754,424
+
+# huijuan = [0,0,0]
+score = 0
+score_list = [0,0,0] # 绘卷掉落
+tupo_ticket = 0 # 突破票
+step = 0 # 当前行为模式：0、回到探索界面；1、获取突破票数量；2、突破直到次数用尽；3、k28
+location = 0 # 0、探索界面；1、k28进入页面；2、k28内界面；3、k28退出；4、突破页面;5、突破确认目标页面；6、战斗页面
+click_number = 0
+tupo_attack_number = 0
+tupo_exit = 0
+
+pos_obj_list = ['again-attack', 'attack-exit', 'auto-logo', 'buff-logo', 'common-blue-exit', 'common-box-confirm', 'common-red-cancel', 'common-red-exit', 'common-yellow-confirm', 'e-mail', 'failed-logo', 'flame', 'goxie-accept', 'goxie-logo', 'goxie-refuse', 'huijuan-big', 'huijuan-normal', 'huijuan-small', 'k28-box-big', 'k28-box-small', 'k28-success-box', 'ready', 'realm-again', 'realm-logo', 'realm-success', 'realm-ticket', 'realm-wait', 'royal-logo', 'shiki-dir', 'soul-logo', 'success-damo', 'willpower', 'world-message']
+tmp_num = 0.0
+obj_list = {}
+for i in pos_obj_list:
+    obj_list[i] = tmp_num
+    tmp_num += 1.0
+
+pos_obj = obj_list.copy()
+huijuan_state = 0

@@ -1,9 +1,10 @@
 # 获取权限
 # from ctypes import windll
-import config
+import config,json
 from sys import version_info,executable
-from util import sleep,windll,get_windows,rand_num,mouse_click,yys_window_name,init_window_pos,is_admin, \
-help ,check_windows,check_user,error_exit,get_system_dpi,Image,update,json,action
+from util import windll,get_windows,yys_window_name,init_window_pos,is_admin, \
+help,check_windows,check_user,error_exit,get_system_dpi,update,action
+from ai_huijuan import huijuan
 
 # def yuling():
 #     while True:
@@ -159,7 +160,7 @@ def save_img():
         if choose == '0':
             return
         elif choose == '1':
-            window = get_windows(config.yys_window_hwnd,mode_flag)
+            window = get_windows(config.yys_window_hwnd)
             window.save('./img/tmp_'+str(num)+".png")
             num += 1
             window.close()
@@ -258,9 +259,19 @@ if __name__ == "__main__":
                 save_img()
             elif choose == '2':# debug
                 config.mode_flag |= 1
+            elif choose == '3':# 绘卷
+                score = input("请输入今日目标绘卷分数（0-2000）：").strip()
+                try:
+                    score = int(score)
+                    if score < 0 or score >= 2000:
+                        raise Exception("序号输入错误")
+                except Exception as e:
+                    print(e)
+                config.score = score
+                huijuan()
             else:
                 if choose.isdigit():
-                    choose = int(choose) - 3
+                    choose = int(choose) - 4
                     action(yysauto_config["actions"][actions[choose]])
     else:
         if version_info[0] == 3:

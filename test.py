@@ -34,10 +34,10 @@ def _callback( hwnd, extra ):
     windows[hwnd] = temp
 
 if __name__=="__main__":
-    windll.shcore.SetProcessDpiAwareness(0)
-    a=get_system_dpi(0x0470908)
-    print(a)
-    check_windows("阴阳师-网易游戏")
+    # windll.shcore.SetProcessDpiAwareness(0)
+    # a=get_system_dpi(0x0470908)
+    # print(a)
+    result,windows = check_windows("阴阳师-网易游戏")
     # screen,screeninfo = get_windows("阴阳师-网易游戏",'',1)
     # print(type(screen))
     # print(dir(screen))
@@ -53,29 +53,41 @@ if __name__=="__main__":
 
 # 00470908
 
-    img = get_windows(0x00470908,1)#= Image.frombuffer("RGB", (screeninfo['bmWidth'], screeninfo['bmHeight']), screen, 'raw', 'BGRX', 0, 1)
+    img = get_windows(windows[0][0])#= Image.frombuffer("RGB", (screeninfo['bmWidth'], screeninfo['bmHeight']), screen, 'raw', 'BGRX', 0, 1)
 
-    dc = win32gui.GetWindowDC(0x00470908)
-    a = win32gui.GetDlgCtrlID(0x003063A)
-    print(a)
-    windows = {}
-    win32gui.EnumChildWindows(0x0470908,_callback,windows)
-    print(windows)
-    print(win32gui.GetMessage(0x0470908,0,300))
-    print(win32gui.GetDlgItem(0x003063A,a))#.GetClassName(0x00470908))
+    # dc = win32gui.GetWindowDC(0x00470908)
+    # a = win32gui.GetDlgCtrlID(0x003063A)
+    # print(a)
+    # windows = {}
+    # win32gui.EnumChildWindows(0x0470908,_callback,windows)
+    # print(windows)
+    # print(win32gui.GetMessage(0x0470908,0,300))
+    # print(win32gui.GetDlgItem(0x003063A,a))#.GetClassName(0x00470908))
 
-    #img = Image.fromarray(screen.astype('uint8')).convert('RGB')
-    img.show()
-    print(img.size)
-    img.close()
-    handle = win32gui.FindWindow(None,"阴阳师-网易游戏")
+    # #img = Image.fromarray(screen.astype('uint8')).convert('RGB')
+    # img.show()
+    # print(img.size)
+    # img.close()
+    # handle = win32gui.FindWindow(None,"阴阳师-网易游戏")
 
-    # x,y = 720,440
+    # # x,y = 720,440
     # x,y = 1070,625
-    x,y = 730,400
-    print("dianji")
-    win32api.SendMessage(handle,win32con.WM_LBUTTONDOWN,0,(y << 16)+x)
-    win32api.SendMessage(handle,win32con.WM_LBUTTONUP,0,(y << 16)+x)
+    # x,y = 730,400
+
+    import ai_huijuan
+
+    ai_huijuan.click_xy([5,290,15,310])
+
+    # x,y = 350,210
+    # print("dianji")
+    # win32api.SendMessage(windows[0][0],win32con.WM_LBUTTONDOWN,0,(y << 16)+x)
+    # win32api.SendMessage(windows[0][0],win32con.WM_LBUTTONUP,0,(y << 16)+x)
+    # import time
+    # time.sleep(1)
+    # x,y = 600,206
+    # print("dianji")
+    # win32api.SendMessage(windows[0][0],win32con.WM_LBUTTONDOWN,0,(y << 16)+x)
+    # win32api.SendMessage(windows[0][0],win32con.WM_LBUTTONUP,0,(y << 16)+x)
 
 
     #print(win32process.GetWindowThreadProcessId(131592))

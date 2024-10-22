@@ -3,7 +3,7 @@
 
 a = Analysis(
     ['yys.py'],
-    pathex=['.\\util.py','.\\config.py'],
+    pathex=['.\\util.py','.\\config.py','.\\ultralytics'],
     binaries=[],
     datas=[],
     hiddenimports=[],

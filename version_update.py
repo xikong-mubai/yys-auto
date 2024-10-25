@@ -37,4 +37,4 @@ yys_zip.close()
 yys_zip_fd = zipfile.ZipFile('./yys-auto.zip')
 yys_zip_fd.extractall()
 
-input("更新完成，请重新运行程序。（按任意键退出）")
+input("更新完成，请重新运行程序或尝试手动解压yys-auto.zip。（按任意键退出）")

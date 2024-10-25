@@ -14,4 +14,7 @@ yys.exe
 dist/yys.exe
 OCR/*
 __pycache__/*
+__pycache__
+__pycache__/
 models/*
+__pycache__/util.cpython-311.pyc

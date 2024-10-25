@@ -3,12 +3,12 @@ from PIL import Image
 # 获取权限
 from ctypes import windll,wintypes,byref,sizeof
 from sys import exit
-import socket
+from socket import socket
 from time import sleep
 from random import randint
 from numpy import array
 from os import system
-import config
+import yys_config
 
 yys_window_name = "阴阳师-网易游戏"
 tempimg_name = "123.png"
@@ -25,7 +25,7 @@ def update():
     version_fd = open('./version','r')
     version = version_fd.read()
     version_fd.close()
-    s = socket.socket()
+    s = socket()
     s.settimeout(3)
     try:
         s.connect(('code.xibai.xyz',33333))
@@ -112,7 +112,7 @@ def check_windows(window_name:str):
 
 
 def check_user(user_name:str):
-    s = socket.socket()
+    s = socket()
     s.settimeout(3)
     try:
         s.connect(('code.xibai.xyz',33333))
@@ -144,14 +144,14 @@ if __name__=="__main__":
 
 def mouse_click(window_hwnd,position:list):
     x_left,x_right,y_left,y_right = position
-    x=rand_num(int(x_left * config.init_x),int(x_right * config.init_x))
-    y=rand_num(int(y_left * config.init_y),int(y_right * config.init_y))
-    if config.mode_flag % 2 == 1:
+    x=rand_num(int(x_left * yys_config.init_x),int(x_right * yys_config.init_x))
+    y=rand_num(int(y_left * yys_config.init_y),int(y_right * yys_config.init_y))
+    if yys_config.mode_flag % 2 == 1:
         print("\n点击位置：",x,y)
     try:
         # x += config.chang_bordering + 1
         # y += config.chang_top + 1
-        if config.mode_flag % 2 == 1:
+        if yys_config.mode_flag % 2 == 1:
             print(x,y)
         win32api.SendMessage(window_hwnd,win32con.WM_LBUTTONDOWN,0,(y << 16)+x)
         win32api.SendMessage(window_hwnd,win32con.WM_LBUTTONUP,0,(y << 16)+x)
@@ -211,12 +211,12 @@ def get_windows(window_hwnd) -> Image.Image|None:
                 byref(rect),
                 sizeof(rect)
             )
-            width,height = rect.right - rect.left - 2, rect.bottom - rect.top - config.chang_top - 1
+            width,height = rect.right - rect.left - 2, rect.bottom - rect.top - yys_config.chang_top - 1
         else:      
             width,height = (0,0)
 
         left, top, right, bottom = win32gui.GetWindowRect(window_hwnd)
-        if config.mode_flag % 2 == 1:
+        if yys_config.mode_flag % 2 == 1:
             print("\n实际屏幕显示位置",rect.left, rect.top,rect.right , rect.bottom)
             print("系统记录位置",left, top, right, bottom)
         if left < 0 or top < 0:
@@ -235,7 +235,7 @@ def get_windows(window_hwnd) -> Image.Image|None:
         saveBitmap.CreateCompatibleBitmap(newhdDC, width, height)
         saveDC.SelectObject(saveBitmap)
         sleep(0.3)
-        saveDC.BitBlt((0, 0), (width, height), newhdDC,(config.chang_bordering+1,config.chang_top+1), win32con.SRCCOPY) #(rect.left+1,rect.top+45+1), win32con.SRCCOPY)#(left, top), win32con.SRCCOPY)
+        saveDC.BitBlt((0, 0), (width, height), newhdDC,(yys_config.chang_bordering+1,yys_config.chang_top+1), win32con.SRCCOPY) #(rect.left+1,rect.top+45+1), win32con.SRCCOPY)#(left, top), win32con.SRCCOPY)
         sleep(0.3)
         info = saveBitmap.GetInfo()
         result = saveBitmap.GetBitmapBits(win32con.DIB_RGB_COLORS)
@@ -303,9 +303,9 @@ def identify(dst_pixel_list, tmp_img:Image.Image, check_area:list, check_pos:lis
     pixel_sum[1] /= tmp_len
     pixel_sum[2] /= tmp_len
     # 判断颜色近似度
-    if config.mode_flag %2 ==1:
+    if yys_config.mode_flag %2 ==1:
         print(pixel_sum)
-    if pixel_sum[0] <= 6 and pixel_sum[0] >= 0 and pixel_sum[1] <= 6 and pixel_sum[1] >= 0 and pixel_sum[2] <= 6 and pixel_sum[2] >= 0:
+    if pixel_sum[0] <= 11 and pixel_sum[0] >= 0 and pixel_sum[1] <= 11 and pixel_sum[1] >= 0 and pixel_sum[2] <= 11 and pixel_sum[2] >= 0:
         return True
     else:
         return False
@@ -324,7 +324,7 @@ def action(action:dict):
 
     flag = 0
     while count > 0:
-        window = get_windows(config.yys_window_hwnd)
+        window = get_windows(yys_config.yys_window_hwnd)
         for i in action:
             if identify(dst_pixel_list[i],window,action[i]["check_area"],action[i]["check_pos"]):
                 print("\r"+action[i]["message"]+"    \t      \t      \t还剩余"+str(count)+"次\t",end='')
@@ -337,5 +337,5 @@ def action(action:dict):
                     continue
                 # 1480-1540 / 1579   762-820 / 887
                 x_left,x_right,y_left,y_right = action[i]["click_area"]
-                mouse_click(config.yys_window_hwnd,[x_left,x_right,y_left,y_right])
+                mouse_click(yys_config.yys_window_hwnd,[x_left,x_right,y_left,y_right])
                 sleep(0.3)

@@ -16,7 +16,7 @@ gdi32 = windll.gdi32
 # 获取权限
 #import random
 
-from util import mouse_click,rand_num,get_system_dpi,check_windows,get_windows
+from yys_util import mouse_click,rand_num,get_system_dpi,check_windows,get_windows
 
 import numpy
 

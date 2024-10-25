@@ -13,8 +13,9 @@ init_x,init_y = 754,424
 score = 0
 score_list = [0,0,0] # 绘卷掉落
 tupo_ticket = 0 # 突破票
+state = 0 # 战斗状态：0、检测场所是否对应；1、检测战斗目标；2、是否正在战斗；3、战斗结果
 step = 0 # 当前行为模式：0、回到探索界面；1、获取突破票数量；2、突破直到次数用尽；3、k28
-location = 0 # 0、探索界面；1、k28进入页面；2、k28内界面；3、k28退出；4、突破页面;5、突破确认目标页面；6、战斗页面
+location = 0 # 0、探索界面；1、k28进入页面；2、k28内界面；3、突破页面; 4、战斗页面; 5、结算页面
 click_number = 0
 tupo_attack_number = 0
 tupo_exit = 0
@@ -25,6 +26,4 @@ obj_list = {}
 for i in pos_obj_list:
     obj_list[i] = tmp_num
     tmp_num += 1.0
-
 pos_obj = obj_list.copy()
-huijuan_state = 0

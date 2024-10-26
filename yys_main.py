@@ -212,11 +212,11 @@ def main():
     mode_flag |= 4
     dpi = (yys_config.dst_dpi*yys_config.sys_dpi)
     yys_config.dpi = dpi
-    yys_config.chang_bordering,yys_config.chang_top = int(yys_config.chang_bordering*dpi),int(yys_config.chang_top*dpi)
     # config.chang_bordering = int(config.chang_bordering) +1 if config.chang_bordering - int(config.chang_bordering) > 0 else int(config.chang_bordering)
     # config.chang_top = int(config.chang_top) +1 if config.chang_top - int(config.chang_top) > 0 else int(config.chang_top)
     yys_config.global_x = yys_config.init_x + yys_config.chang_bordering * 2 + 2
     yys_config.global_y = yys_config.init_y + yys_config.chang_top + yys_config.chang_bordering + 2
+    yys_config.chang_bordering,yys_config.chang_top = int(yys_config.chang_bordering*dpi),int(yys_config.chang_top*dpi)
 
     print("预设窗口宽高为：",yys_config.global_x,yys_config.global_y)
     print("初始化窗口位置...")

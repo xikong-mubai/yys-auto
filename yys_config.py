@@ -6,8 +6,8 @@ sys_a = 0
 yys_window_hwnd = 0
 global_x = 0
 global_y = 0
-chang_bordering,chang_top = 7,30# 22,57
-init_x,init_y = 754,424
+chang_bordering,chang_top = 7,23# 22,57
+init_x,init_y = 752,424
 
 # huijuan = [0,0,0]
 score = 0

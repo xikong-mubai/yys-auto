@@ -211,7 +211,7 @@ def get_windows(window_hwnd) -> Image.Image|None:
                 byref(rect),
                 sizeof(rect)
             )
-            width,height = rect.right - rect.left - 2, rect.bottom - rect.top - yys_config.chang_top - 1
+            width,height = rect.right - rect.left - 2, rect.bottom - rect.top - yys_config.chang_top - yys_config.chang_bordering - 2
         else:      
             width,height = (0,0)
 
@@ -235,7 +235,7 @@ def get_windows(window_hwnd) -> Image.Image|None:
         saveBitmap.CreateCompatibleBitmap(newhdDC, width, height)
         saveDC.SelectObject(saveBitmap)
         sleep(0.3)
-        saveDC.BitBlt((0, 0), (width, height), newhdDC,(yys_config.chang_bordering+1,yys_config.chang_top+1), win32con.SRCCOPY) #(rect.left+1,rect.top+45+1), win32con.SRCCOPY)#(left, top), win32con.SRCCOPY)
+        saveDC.BitBlt((0, 0), (width, height), newhdDC,(yys_config.chang_bordering + 1, yys_config.chang_top+yys_config.chang_bordering + 1), win32con.SRCCOPY) #(rect.left+1,rect.top+45+1), win32con.SRCCOPY)#(left, top), win32con.SRCCOPY)
         sleep(0.3)
         info = saveBitmap.GetInfo()
         result = saveBitmap.GetBitmapBits(win32con.DIB_RGB_COLORS)

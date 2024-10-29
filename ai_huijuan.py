@@ -288,21 +288,23 @@ def tupo_attack(xy):
             if yys_config.location != location_codes['attack']:
                 tupo_state = state['Settlement']
         elif tupo_state == state['Settlement']:
-            if 'success' in message:
-                # 读取绘卷或突破票
-                if yys_config.location == location_codes['tupo']:
-                    return True
-                if success_flag == 0:
-                    yys_config.tupo_attack_number += 1
-                    success_flag = 1
-                click_xy([0.0065,0.62635,0.0295,0.6695])
-            elif 'failed' in message:
+            
+            if 'failed' in message:
                 yys_config.tupo_exit += 1
                 if yys_config.tupo_exit >= 4:
                     yys_config.tupo_attack_number = 0
                     yys_config.tupo_exit = 0
                 click_xy([0.0065,0.62635,0.0295,0.6695])
                 tupo_state = state['location_check']
+            else:
+                if 'success' in message:
+                # 读取绘卷或突破票
+                    if success_flag == 0:
+                        yys_config.tupo_attack_number += 1
+                        success_flag = 1
+                    click_xy([0.0065,0.62635,0.0295,0.6695])
+                if success_flag == 1 and yys_config.location == location_codes['tupo']:
+                    return True
         result,message,r,image = identify()
 
 

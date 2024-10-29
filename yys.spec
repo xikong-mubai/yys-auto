@@ -32,22 +32,9 @@ for f in my_files:
     
 # ==================新建 a 变量，分析脚本============================
 
-# a = Analysis(
-#     ['yys.py'],
-#     pathex=['F:\\study\\code\\python\\yys-ai-cpu\\Lib\\site-packages\\torch\\lib'],
-#     binaries=[],
-#     datas=datas,
-#     hiddenimports=[],
-#     hookspath=[],
-#     hooksconfig={},
-#     runtime_hooks=[],
-#     excludes=["IPython"],
-#     noarchive=False,
-#     optimize=0,
-# )
 a = Analysis(
-    ['test_1.py'],
-    pathex=[],
+    ['yys.py'],
+    pathex=['F:\\study\\code\\python\\yys-ai-cpu\\Lib\\site-packages\\torch\\lib'],
     binaries=[],
     datas=datas,
     hiddenimports=[],

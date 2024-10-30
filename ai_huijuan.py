@@ -164,7 +164,9 @@ def no_k28_check(image):
     #     real_r = r.boxes.cls.tolist()
     #     if 42.0 in real_r or 39.0 in real_r: # 39: 困28；42: 突破按钮
     #         return True,"in TanSuo Root",r
-    click_xy([0.0065,0.62635,0.0295,0.6695])
+    if yys_config.click_number % 3 == 0:
+        click_xy([0.0065,0.62635,0.0295,0.6695])
+    yys_config.click_number += 1
     return False,"uknown position",None
 
 def location_change(message):
@@ -186,7 +188,7 @@ def location_change(message):
     elif yys_config.location == location_codes['attack']:
         if 'success' in message or 'failed' in message:
             yys_config.location = location_codes['settlement']
-        elif 'tupo' in message:
+        elif 'tupo' in message and "exit" not in message:
             yys_config.location = location_codes['tupo']
         elif 'k28' in message:
             yys_config.location = location_codes['k28']
@@ -244,9 +246,9 @@ def tupo_attack(xy):
                 return False
             elif yys_config.location == location_codes['tupo']:
                 tupo_state = state['choose']
+                continue
             elif yys_config.location == location_codes['settlement']:
                 click_xy([0.0065,0.62635,0.0295,0.6695])
-                continue
         elif tupo_state == state['choose']:
             if flag == 0:
                 click_xy([(xy[2] + xy[0])/2,xy[1],xy[2],xy[3]])
@@ -280,15 +282,22 @@ def tupo_attack(xy):
                     flag = 0
             # tupo_state = state['attack']
         elif tupo_state == state['attack']:
+            # if yys_config.location == location_codes['attack']:
+                # if pos_obj['attack-exit'] in r.keys():
             if yys_config.tupo_attack_number >= 9:
+                # if yys_config.location == location_codes['attack']:
                 if pos_obj['common-red-cancel'] not in r.keys():
-                    click_xy([30,30,50,50])
+                    click_xy([0.02,0.0354,0.0399,0.07])
                 else:
-                    enter(r,6)
-            if yys_config.location != location_codes['attack']:
+                    enter(r,7)
+                if yys_config.location == location_codes['settlement']:
+                    tupo_state = state['Settlement']
+                    continue
+            # elif yys_config.location != location_codes['attack']:
+            else:
                 tupo_state = state['Settlement']
+                continue
         elif tupo_state == state['Settlement']:
-            
             if 'failed' in message:
                 yys_config.tupo_exit += 1
                 if yys_config.tupo_exit >= 4:
@@ -441,6 +450,7 @@ def huijuan():
                 enter(r,location_codes['tansuo'])
             else:
                 yys_config.step += 1
+                yys_config.click_number = 1
                 continue
         elif yys_config.step == 1:
         # 获取突破剩余次数

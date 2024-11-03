@@ -305,7 +305,7 @@ def identify(dst_pixel_list, tmp_img:Image.Image, check_area:list, check_pos:lis
     # 判断颜色近似度
     if yys_config.mode_flag %2 ==1:
         print(pixel_sum)
-    if pixel_sum[0] <= 11 and pixel_sum[0] >= 0 and pixel_sum[1] <= 11 and pixel_sum[1] >= 0 and pixel_sum[2] <= 11 and pixel_sum[2] >= 0:
+    if pixel_sum[0] <= 6 and pixel_sum[0] >= 0 and pixel_sum[1] <= 6 and pixel_sum[1] >= 0 and pixel_sum[2] <= 6 and pixel_sum[2] >= 0:
         return True
     else:
         return False

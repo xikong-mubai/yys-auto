@@ -1,7 +1,7 @@
 # 获取权限
 # from ctypes import windll
 import yys_config,json
-from yys_util import get_windows,init_window_pos,is_admin, \
+from yys_util import get_windows,init_window_pos, \
 help,check_windows,check_user,error_exit,get_system_dpi,update,action
 from ai_huijuan import huijuan
 

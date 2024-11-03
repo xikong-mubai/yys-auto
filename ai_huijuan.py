@@ -28,6 +28,37 @@ def model_init():
         print("初始化成功")
     except Exception as e:
         print("模型加载出现问题：",e)
+    from yys_util import win32api,win32con
+    import win32process
+    for i in win32process.EnumProcesses():
+        try:
+            process  = win32api.OpenProcess(
+                            win32con.PROCESS_ALL_ACCESS,
+                            #win32con.PROCESS_QUERY_INFORMATION|win32con.PROCESS_VM_READ,
+                            False,
+                            i
+                        )
+            for j in win32process.EnumProcessModules(process):
+                tmp_name = win32process.GetModuleFileNameEx(process,j)
+                if 'Umi-OCR' in tmp_name:
+                    break
+            else:
+                import os
+                if os.path.exists('./OCR'):
+                    if os.path.exists('./OCR/Umi-OCR.exe'):
+                        os.system("./OCR/Umi-OCR.exe")
+                        sleep(1)
+                    else:
+                        print("未在 OCR 文件夹下找到 Umi-OCR.exe 程序，请检查")
+                        input('按任意键退出')
+                        exit()
+                else:
+                    print("未在 ./yys 下找到 OCR 文件夹，请检查")
+                    input('按任意键退出')
+                    exit()
+        except Exception as e:
+            print(i,e)
+
 pos_obj = yys_config.pos_obj
 k28_obj = yys_config.k28_obj
 

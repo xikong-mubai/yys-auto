@@ -30,11 +30,11 @@ for i in win32process.EnumProcesses():
 
 url = 'https://code.xibai.xyz/yys-auto.zip'
 r = requests.get(url,verify=False)
-yys_zip = open('./yys-auto.zip','wb')
+yys_zip = open('../yys-auto.zip','wb')
 yys_zip.write(r.content)
 yys_zip.close()
 
-yys_zip_fd = zipfile.ZipFile('./yys-auto.zip')
+yys_zip_fd = zipfile.ZipFile('../yys-auto.zip')
 yys_zip_fd.extractall()
 
 input("更新完成，请重新运行程序或尝试手动解压yys-auto.zip。（按任意键退出）")

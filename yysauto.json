@@ -371,7 +371,7 @@
             },
             "2": {
                 "name": "finish_result_1",
-                "message": "结算画面二阶段",
+                "message": "结算画面一阶段",
                 "img_path": "./img/pata/war_end_1.png",
                 "check_area": [0.40636, 0.4947, 0.7704, 0.7704],
                 "check_pos": [],
@@ -382,9 +382,9 @@
                 "name": "finish_result_2",
                 "message": "结算画面二阶段",
                 "img_path": "./img/pata/war_end_2.png",
-                "check_area": [0.3374,0.67314,0.8019,0.8019],
+                "check_area": [0.1111,0.25,0.8019,0.8019],
                 "check_pos":[],
-                "click_area":[0.3374,0.67314,0.8019,0.8019],
+                "click_area":[0.1111,0.25,0.8019,0.8019],
                 "type": 1
             }
         }

@@ -3,6 +3,7 @@ img
 img*
 img*/*
 img*/*/*
+*.png
 build/
 dist/
 build

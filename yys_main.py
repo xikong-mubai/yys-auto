@@ -43,6 +43,7 @@ def choose_windows(windows):
             except Exception as e:
                 print(e)
     yys_config.yys_window_hwnd = windows[choose][0]
+    yys_config.yys_click_window = windows[choose][0]
 
 def dpi_init():
     print("当前目标窗口dpi及其dpi感知级别：",end='')
@@ -75,11 +76,6 @@ def main():
     update()
     print("请稍等，正在加载资源......")
 
-    x,y = 1050,572
-    windows = get_window_handle()
-    choose_windows(windows)
-    dpi_init()
-
     fp = open('./yysauto.json','r',encoding='utf-8')
     yysauto_config = json.load(fp)
     fp.close()
@@ -102,9 +98,14 @@ def main():
     for i in yysauto_config["actions"]:
         actions.append(i)
 
+    windows = get_window_handle()
+    choose_windows(windows)
+    dpi_init()
+
     while True:
         help(actions)
         choose = input('请选择模式：')
+
         if choose == '0':
             error_exit()
         elif choose == '1':# save_img

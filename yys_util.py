@@ -15,7 +15,7 @@ tempimg_name = "123.png"
 
 def help(actions:list):
     print('1. 更新本地对比图片')
-    print('2. 获取屏幕位置信息')
+    print('2. 选择模式（默认PC端）')
     print('3. 尝试绘卷')
     for i in range(len(actions)):
         print(str(i+4) + '. ' + actions[i])
@@ -59,6 +59,9 @@ def flag_choose():
         yys_config.flag |= 1
     elif flag == '2':
         yys_config.flag |= 2
+        windows = check_child_windows(yys_config.yys_window_hwnd)
+        yys_config.yys_click_window = windows[1][0][0]
+
 
 def error_exit():
     input("输入任意键退出")
@@ -342,5 +345,5 @@ def action(action:dict):
                     continue
                 # 1480-1540 / 1579   762-820 / 887
                 x_left,x_right,y_left,y_right = action[i]["click_area"]
-                mouse_click(yys_config.yys_window_hwnd,[x_left,x_right,y_left,y_right])
+                mouse_click(yys_config.yys_click_window,[x_left,x_right,y_left,y_right])
                 sleep(0.3)

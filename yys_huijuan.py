@@ -65,7 +65,7 @@ def click_xy(xy):
     if xy[1] < xy[0]: tmp = xy[1] ; xy[1] = xy[0] ; xy[0] = tmp
     if xy[3] < xy[2]: tmp = xy[3] ; xy[3] = xy[2] ; xy[2] = tmp
     print(xy)
-    mouse_click(yys_config.yys_window_hwnd,xy)
+    mouse_click(yys_config.yys_click_window,xy)
 
 def tupo_dedup(tmp_xyxy_a,tmp_xyxy_b):
     '''清除突破中与另两种重复的框框'''
@@ -458,7 +458,7 @@ def tupo_attack(xy):
                 if failed_flag == 2:
                     yys_config.tupo_exit += 1
                 if failed_flag > 1:
-                    if yys_config.tupo_exit >= 4:
+                    if yys_config.tupo_exit >= 6:
                         yys_config.tupo_attack_number = 0
                         yys_config.tupo_exit = 0
                     click_xy([0.0065,0.61635,0.0295,0.6395])

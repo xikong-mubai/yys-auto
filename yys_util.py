@@ -1,13 +1,11 @@
-import win32gui,win32ui,win32con,win32api,win32print,win32process
+from yys_windows import ctypes,win32gui,win32ui,win32con,win32api,win32process\
+    ,sleep,array,check_child_windows,get_windows
 from PIL import Image
 # 获取权限
-from ctypes import windll,wintypes,byref,sizeof
 from sys import exit
-from socket import socket
-from time import sleep
-from random import randint
-from numpy import array
 from os import system
+from socket import socket
+from random import randint
 import yys_config
 
 yys_window_name = "阴阳师-网易游戏"
@@ -62,14 +60,13 @@ def flag_choose():
         windows = check_child_windows(yys_config.yys_window_hwnd)
         yys_config.yys_click_window = windows[1][0][0]
 
-
 def error_exit():
     input("输入任意键退出")
     exit()
 
 def is_admin():
     try:
-        return windll.shell32.IsUserAnAdmin()
+        return ctypes.windll.shell32.IsUserAnAdmin()
     except Exception as e:
         print('\r\n',e)
         return False
@@ -77,79 +74,6 @@ def is_admin():
 # 生成随机数
 def rand_num(x:int, y:int):
     return round(randint(x, y),3)
- 
-def get_system_dpi(window_hwnd):
-    """获取缩放后的分辨率"""
-    # 尝试设置程序dpi比例，不可行  windll.shcore.SetProcessDpiAwareness(0)
-    # PROCESS_DPI_AWARENESS = {
-    #     "PROCESS_DPI_UNAWARE" : 0,          # DPI 不知道。 此应用不会缩放 DPI 更改，并且始终假定其比例系数为 100% (96 DPI) 。 系统将在任何其他 DPI 设置上自动缩放它。
-    #     "PROCESS_SYSTEM_DPI_AWARE" : 1,     # 系统 DPI 感知。 此应用不会缩放 DPI 更改。 它将查询 DPI 一次，并在应用的生存期内使用该值。 如果 DPI 发生更改，应用将不会调整为新的 DPI 值。 当 DPI 与系统值发生更改时，系统会自动纵向扩展或缩减它。
-    #     "PROCESS_PER_MONITOR_DPI_AWARE" : 2 # 按显示器 DPI 感知。 此应用在创建 DPI 时检查 DPI，并在 DPI 发生更改时调整比例系数。 系统不会自动缩放这些应用程序。 
-    # }
-    hdc = win32gui.GetDC(window_hwnd)
-    a = wintypes.DWORD()
-    windll.shcore.GetProcessDpiAwareness(window_hwnd,byref(a))
-    if a.value == 0:
-        dpi = float(win32print.GetDeviceCaps(hdc, win32con.DESKTOPHORZRES) / win32print.GetDeviceCaps(hdc, win32con.HORZRES))
-        # print(win32print.GetDeviceCaps(hdc, win32con.DESKTOPHORZRES),win32print.GetDeviceCaps(hdc, win32con.HORZRES))
-    else:
-        x_dpi: int = win32print.GetDeviceCaps(hdc, win32con.LOGPIXELSX)
-        # dpi:screen_scale_rate = x_dpi/96
-        dpi = float(x_dpi / 96)
-    a = -1 if a.value == 4294967295 else a.value
-    return dpi,float(a)
-
-def _callback( hwnd, extra ):
-    windows = extra
-    temp=[]
-    left, top, right, bottom = win32gui.GetWindowRect(hwnd)
-    #if left == 0 and top == 0 and right < 1280 and right > 640:
-    temp.append(hwnd)
-    temp.append(win32gui.GetClassName(hwnd))
-    temp.append(win32gui.GetWindowText(hwnd))
-    temp.append((left, top, right, bottom))
-    windows[hwnd] = temp
-
-def check_windows(window_name:str):
-    windows = {} ; length = 0
-    dst = []
-    win32gui.EnumWindows(_callback, windows)
-    # print("Enumerated a total of  windows with %d classes"%(len(windows)))
-    for item in windows:
-        if window_name == windows[item][2] and window_name != "":
-            dst.append(windows[item])
-            length += 1
-    if length == 0:
-        print(window_name+" is notfound")
-        return False,dst
-    return True,dst
-
-def check_child_windows(win_handle):
-    windows = {} ; length = 0 ; dst = []
-    win32gui.EnumChildWindows(win_handle,_callback, windows)
-    for item in windows:
-        if 'MuMuPlayer' == windows[item][2]:
-            dst.append(windows[item])
-            length += 1
-    if length == 0:
-        print("MuMuPlayer is notfound")
-        return False,dst
-    return True,dst
-
-def get_hwnds_from_pid(pid = None):
-    if pid == None or not isinstance(pid,int) or pid < 0:
-        return False,[]
-    def callback(hwnd, hwnds):
-        print(hwnd)
-        _, result = win32process.GetWindowThreadProcessId(hwnd)
-        print('    ',_, result)
-        if result == pid or _ == pid:
-            hwnds.append(hwnd)
-            return 
-        win32gui.EnumChildWindows(hwnd,callback,hwnds)
-    hwnds = []
-    win32gui.EnumWindows(callback, hwnds)
-    return True,hwnds 
 
 def check_user(user_name:str):
     s = socket()
@@ -168,20 +92,6 @@ def check_user(user_name:str):
         print('用户信息查询失败，姑且当你是自己人，继续运行')
         return True
 
-def init_window_pos(window_hwnd,x,y):
-    try:
-        win32gui.SetWindowPos(window_hwnd, win32con.HWND_NOTOPMOST, 0, 0, x, y, win32con.SWP_SHOWWINDOW)#win32con.SWP_NOACTIVATE|win32con.SWP_SHOWWINDOW)
-        sleep(0.5)
-    except Exception as e:
-        print("init_window_pos error",e)
-        error_exit()
-
-# if __name__=="__main__":
-#     a=get_system_dpi('')
-#     print(a)
-#     check_windows("阴阳师-网易游戏")
-    #print(win32process.GetWindowThreadProcessId(131592))
-
 def mouse_click(window_hwnd,position:list):
     x_left,x_right,y_left,y_right = position
     x=rand_num(int(x_left * yys_config.init_x),int(x_right * yys_config.init_x))
@@ -199,71 +109,6 @@ def mouse_click(window_hwnd,position:list):
         print(e)
     sleep(0.1)
 
-# 获取阴阳师运行状态
-def get_windows(window_hwnd) -> Image.Image|None:
-    try:
-        # 获取窗口DC
-        window_hd_dc = win32gui.GetWindowDC(window_hwnd)
-
-        # 获取窗口的位置信息
-        try:
-            f = windll.dwmapi.DwmGetWindowAttribute
-        except WindowsError:
-            f = None
-            print("\r\nDwmGetWindowAttributeError")
-        if f: # Vista & 7 stuff
-            rect = wintypes.RECT()
-            DWMWA_EXTENDED_FRAME_BOUNDS = 9
-            f(  
-                wintypes.HWND(window_hwnd),
-                wintypes.DWORD(DWMWA_EXTENDED_FRAME_BOUNDS),
-                byref(rect),
-                sizeof(rect)
-            )
-            width,height = rect.right - rect.left - 2, rect.bottom - rect.top - yys_config.chang_top - yys_config.chang_bordering - 2
-        else:      
-            width,height = (0,0)
-
-        left, top, right, bottom = win32gui.GetWindowRect(window_hwnd)
-        if yys_config.flag % 2 == 1:
-            print("\n实际屏幕显示位置",rect.left, rect.top,rect.right , rect.bottom)
-            print("系统记录位置",left, top, right, bottom)
-        if left < 0 or top < 0:
-            print("\n实际屏幕显示位置",rect.left, rect.top,rect.right , rect.bottom)
-            print("系统记录位置",left, top, right, bottom)
-            print("\a\n请把目标窗口打开至桌面（不能最小化）")
-
-        # 根据句柄创建一个DC
-        new_hd_dc = win32ui.CreateDCFromHandle(window_hd_dc)
-        # 创建一个兼容设备内存的DC
-        save_dc = new_hd_dc.CreateCompatibleDC()
-        # 创建bitmap保存图片
-        save_bitmap = win32ui.CreateBitmap()
-        # bitmap初始化
-        save_bitmap.CreateCompatibleBitmap(new_hd_dc, width, height)
-        save_dc.SelectObject(save_bitmap)
-        sleep(0.3)
-        save_dc.BitBlt((0, 0), (width, height), new_hd_dc,(yys_config.chang_bordering + 1, yys_config.chang_top+yys_config.chang_bordering + 1), win32con.SRCCOPY) #(rect.left+1,rect.top+45+1), win32con.SRCCOPY)#(left, top), win32con.SRCCOPY)
-        sleep(0.3)
-        info = save_bitmap.GetInfo()
-        result = save_bitmap.GetBitmapBits(win32con.DIB_RGB_COLORS)
-        win32gui.DeleteObject(save_bitmap.GetHandle())
-        save_dc.DeleteDC()
-        new_hd_dc.DeleteDC()
-        win32gui.ReleaseDC(window_hwnd,window_hd_dc)
-
-        screen =[]
-        for i in result:
-            if i >= 0:
-                screen.append(i)
-            else:
-                screen.append(256+i)
-        screen = array(screen,dtype='uint8')
-        img = Image.frombuffer("RGB", (info['bmWidth'], info['bmHeight']), screen, 'raw', 'BGRX', 0, 1)
-        return img
-    except Exception as error:
-        print("\r\nget_window error!!!\n",error)
-        return None
 
 def get_img_pixel_list(img:Image.Image,check_area:list):
     img_pixel_list = []
@@ -332,18 +177,20 @@ def action(action:dict):
 
     flag = 0
     while count > 0:
-        window = get_windows(yys_config.yys_window_hwnd)
-        for i in action:
-            if identify(dst_pixel_list[i],window,action[i]["check_area"],action[i]["check_pos"]):
-                print("\r"+action[i]["message"]+"    \t      \t      \t还剩余"+str(count)+"次\t",end='')
-                if action[i]["type"] == 0:
-                    flag = 0
-                elif action[i]["type"] == 1 and flag == 0:
-                    count -= 1
-                    flag = 1
-                if len(action[i]["click_area"]) == 0:
-                    continue
-                # 1480-1540 / 1579   762-820 / 887
-                x_left,x_right,y_left,y_right = action[i]["click_area"]
-                mouse_click(yys_config.yys_click_window,[x_left,x_right,y_left,y_right])
-                sleep(0.3)
+        sleep(0.005)
+        window = get_windows()
+        if window != None:
+            for i in action:
+                if identify(dst_pixel_list[i],window,action[i]["check_area"],action[i]["check_pos"]):
+                    print("\r"+action[i]["message"]+"    \t      \t      \t还剩余"+str(count)+"次\t",end='')
+                    if action[i]["type"] == 0:
+                        flag = 0
+                    elif action[i]["type"] == 1 and flag == 0:
+                        count -= 1
+                        flag = 1
+                    if len(action[i]["click_area"]) == 0:
+                        continue
+                    # 1480-1540 / 1579   762-820 / 887
+                    x_left,x_right,y_left,y_right = action[i]["click_area"]
+                    mouse_click(yys_config.yys_click_window,[x_left,x_right,y_left,y_right])
+                    sleep(0.3)

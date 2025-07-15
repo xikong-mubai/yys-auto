@@ -1,8 +1,10 @@
 # 获取权限
 # from ctypes import windll
 import yys_config,json
-from yys_util import get_windows,init_window_pos,flag_choose, \
-help,check_windows,check_user,error_exit,get_system_dpi,update,action
+from yys_util import get_windows,flag_choose, \
+help,check_user,error_exit,update,action
+from yys_windows import check_windows,get_system_dpi,init_window_pos,\
+    init_capture_handle
 from yys_huijuan import huijuan
 
 def save_img():
@@ -12,19 +14,19 @@ def save_img():
         if choose == '0':
             return
         elif choose == '1':
-            window = get_windows(yys_config.yys_window_hwnd)
-            window.save('./img/tmp_'+str(num)+".png")
-            num += 1
-            window.close()
+            window = get_windows()
+            if window != None:
+                window.save('./img/tmp_'+str(num)+".png")
+                num += 1
+                window.close()
+            else:
+                print("本次获取失败")
 
 def get_window_handle():
     # 为空会获取到资源管理器的子窗口pid（空窗口）
-    yys_window_name = input("请输入目标窗口名称：")
-    result,windows = check_windows(yys_window_name)
-    while not result:
-        print("未检测到目标窗口名称。")
-        yys_window_name = input("请重新输入目标窗口名称：")
-        result,windows = check_windows(yys_window_name)
+    result,windows = check_windows()
+    if not result:
+        error_exit()
     return windows
 
 def choose_windows(windows):
@@ -44,6 +46,7 @@ def choose_windows(windows):
                 print(e)
     yys_config.yys_window_hwnd = windows[choose][0]
     yys_config.yys_click_window = windows[choose][0]
+    init_capture_handle(windows[choose][0])
 
 def dpi_init():
     print("当前目标窗口dpi及其dpi感知级别：",end='')

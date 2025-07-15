@@ -269,7 +269,7 @@ def location_change(message):
 
 def identify():
     while True:
-        image = get_windows(yys_config.yys_window_hwnd)
+        image = get_windows()
         try:
             if yys_config.location == location_codes['k28'] and yys_config.k28_state == state['choose']:
                 result,message,r = k28_check(image) # 判断当前画面并返回结果
@@ -641,7 +641,7 @@ def huijuan():
             # k28直到突破票满
             if yys_config.location == location_codes['tansuo'] and yys_config.location == location_codes['tupo']:
                 yys_config.step = 0
-            elif yys_config.tupo_ticket < 20:
+            elif yys_config.tupo_ticket < 18:
                 if yys_config.location != location_codes['k28_box']:
                     yys_config.step = 0
                 else:

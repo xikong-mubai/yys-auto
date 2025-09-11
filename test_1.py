@@ -118,8 +118,8 @@ from ultralytics import YOLOv10
 global model_k28,model_tupo
 print("初始化AI模型...")
 try:
-    model_k28 = YOLOv10("./models/k28-best.pt")
-    model_tupo = YOLOv10('./models/best-old.pt')
+    model_k28 = YOLOv10("./models/k28.pt")
+    model_tupo = YOLOv10('./models/best.pt')
     print("初始化成功")
 except Exception as e:
     print("模型加载出现问题：",e)
@@ -172,7 +172,7 @@ def k28_check(image):
 
 def no_k28_check(image):
     try:
-        result = model_tupo(image,imgsz=640,conf=0.1)
+        result = model_tupo(image,imgsz=640,conf=0.6)
     except Exception as e:
         print("模型识别遇到问题",e)
         return False,e,None
@@ -297,7 +297,7 @@ def update_tk_frame():
                     img_array = img_array[:width.value * height.value * 3]  # 截取有效数据
                     img_array = img_array.reshape((height.value, width.value, 3))
                     img = Image.fromarray(img_array, 'RGB')
-                    result,message,r = no_k28_check(img)
+                    result,message,r = k28_check(img)
                     draw_img = draw_annotation(img,r)
                     #draw_img.show()
                     img_tk = ImageTk.PhotoImage(image=draw_img)

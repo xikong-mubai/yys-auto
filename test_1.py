@@ -10,8 +10,10 @@ def draw_annotation(img, annot:dict):
     classes_path: `class`文件的path
     """
     class_names = ['again-attack', 'attack-exit', 'auto-logo', 'buff-logo', 'common-blue-exit', 'common-box-confirm', 'common-red-cancel', 'common-red-exit', 'common-yellow-confirm', 'e-mail', 'failed-logo', 'flame', 'goxie-accept', 'goxie-logo', 'goxie-refuse', 'huijuan-big', 'huijuan-normal', 'huijuan-small', 'k28-box-big', 'k28-box-small', 'k28-success-box', 'ready', 'realm-again', 'realm-logo', 'realm-success', 'realm-ticket', 'realm-wait', 'royal-logo', 'shiki-dir', 'soul-logo', 'success-damo', 'willpower', 'world-message']
+    class_names = ['tansuo_combat', 'tansuo_damo', 'tansuo_jinbi', 'tansuo_jingyan']
     num_classes = len(class_names)
     
+    print(annot)
     # 设置不同类别的框的颜色（r,g,b）
     hsv_tuples = [(x / num_classes, 1., 1.) for x in range(num_classes)]
     colors = list(map(lambda x: colorsys.hsv_to_rgb(*x), hsv_tuples))
@@ -53,6 +55,7 @@ def draw_annotation(img, annot:dict):
                 draw.rectangle([left + i, top + i, right - i, bottom - i], outline=colors[int(cls_id)])
             draw.rectangle([tuple(text_origin), tuple(text_origin + label_size)], fill=colors[int(cls_id)])
             draw.text(text_origin, str(label,'UTF-8'), fill=(0,0,0), font=font)
+
     del draw
             
     return image
@@ -148,15 +151,14 @@ def self_dedup(r):
     tmp_r = {float(i):[] for i in range(33)}
     for i in range(len(r_cls_list)):
         tmp_r[r_cls_list[i]].append(r_xyn_list[i].tolist())
-    
     r = tmp_r.copy()
     for r_item in tmp_r:
         if len(tmp_r[r_item]) == 0:
             r.pop(r_item)
         else:
             r[r_item] = _self_dedup(tmp_r[r_item])
-
     return r
+
 def k28_check(image):
     try:
         result = model_k28(image,imgsz=320,conf=0.25)
@@ -292,15 +294,19 @@ def update_tk_frame():
         frame_ready.clear()
         try:
             if get_frame(buffer, BUFFER_SIZE, ctypes.byref(width), ctypes.byref(height), ctypes.byref(out_frame_id)):
+                print(width.value,height.value)
                 try:
                     img_array = np.ctypeslib.as_array(buffer, shape=(width.value * height.value * 3,))
                     img_array = img_array[:width.value * height.value * 3]  # 截取有效数据
                     img_array = img_array.reshape((height.value, width.value, 3))
                     img = Image.fromarray(img_array, 'RGB')
                     result,message,r = k28_check(img)
-                    draw_img = draw_annotation(img,r)
-                    #draw_img.show()
-                    img_tk = ImageTk.PhotoImage(image=draw_img)
+                    if result:
+                        draw_img = draw_annotation(img,r)
+                    # #draw_img.show()
+                        img_tk = ImageTk.PhotoImage(image=draw_img)
+                    else:
+                        img_tk = ImageTk.PhotoImage(image=img)
                     #time.sleep(1000)
                     canvas.config(image=img_tk)
                     canvas.image = img_tk

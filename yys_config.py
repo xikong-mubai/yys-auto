@@ -5,6 +5,7 @@ sys_dpi = 0
 sys_a = 0
 yys_window_hwnd = 0
 yys_click_window = 0
+yys_window_xy = [0,0,0,0]
 global_x = 0
 global_y = 0
 # chang_bordering,chang_top = 7,23# 22,57

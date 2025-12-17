@@ -128,7 +128,7 @@ def k28_check(image):
         result = model_k28(image,imgsz=320,conf=0.25)
     except Exception as e:
         print("模型识别遇到问题",e)
-        return False,e,None
+        return False,str(e),None
     for r in result:
         r = self_dedup(r)
         real_r = r.keys()
@@ -149,7 +149,7 @@ def no_k28_check(image):
         result = model_tupo(image,imgsz=640,conf=0.1)
     except Exception as e:
         print("模型识别遇到问题",e)
-        return False,e,None
+        return False,str(e),None
     for r in result:
         r = self_dedup(r)
         real_r = r.keys()
@@ -269,6 +269,7 @@ def location_change(message):
 
 def identify():
     while True:
+        get_windows()
         image = get_windows()
         try:
             if yys_config.location == location_codes['k28'] and yys_config.k28_state == state['choose']:
@@ -292,9 +293,10 @@ def identify():
 def k28_enter_check(r):
     for _ in range(3):
         if yys_config.location == location_codes['k28_box']:
-            if len(r[pos_obj['common-yellow-confirm']]) == 1:
-                click_xy([0.3568,0.3037,0.3772,0.3241])
-            enter(r,7)
+            if r is not None and pos_obj['common-yellow-confirm'] in r.keys():
+                if len(r[pos_obj['common-yellow-confirm']]) == 1:
+                    click_xy([0.3568,0.3037,0.3772,0.3241])
+                enter(r,7)
             sleep(1)
             _,__,r,yys_config.image = identify()
         else:
@@ -326,7 +328,7 @@ def k28():
             elif yys_config.k28_nothing >= 3:
                 pos_num = 0 ; yys_config.k28_state = state['attack']
                 yys_config.k28_nothing = 0
-            elif k28_obj["tansuo_combat"] in r.keys():
+            elif r and  k28_obj["tansuo_combat"] in r.keys():
                 enter(r,8)
                 pos_num = 0 ; yys_config.k28_state = state['attack']
             elif yys_config.location == location_codes['attack']:
@@ -334,7 +336,7 @@ def k28():
         elif yys_config.k28_state == state['attack']:
             if yys_config.location == location_codes['k28']:
                 pos_num += 1
-                if pos_obj['k28-success-box'] in r.keys():
+                if r and pos_obj['k28-success-box'] in r.keys():
                     enter(r,8)
                     sleep(1.5)
                     click_xy([0.0065,0.61635,0.0295,0.6395])
@@ -368,7 +370,7 @@ def k28():
                     click_xy([0.0065,0.61635,0.0295,0.6395])
             elif success_flag > 1 and yys_config.location != location_codes['settlement']:
                 if yys_config.location == location_codes['k28']:
-                    if pos_obj['k28-success-box'] in r.keys():
+                    if r and pos_obj['k28-success-box'] in r.keys():
                         enter(r,8)
                         sleep(1.5)
                         click_xy([0.0065,0.61635,0.0295,0.6395])
@@ -419,7 +421,7 @@ def tupo_attack(xy):
                 click_xy([(xy[2] + xy[0])/2,xy[1],xy[2],xy[3]])
                 if click_num > 4:
                     return False
-            elif 'confirm' in message:
+            elif 'confirm' in message and r:
                 confirm_list = r[pos_obj['common-yellow-confirm']]
                 tmp_count = len(confirm_list)
                 if tmp_count == 1:
@@ -441,7 +443,7 @@ def tupo_attack(xy):
                 continue
             elif yys_config.tupo_attack_number >= 9 and exit_num < 2:
                 # if yys_config.location == location_codes['attack']:
-                if pos_obj['common-red-cancel'] not in r.keys():
+                if r and pos_obj['common-red-cancel'] not in r.keys():
                     click_xy([0.02,0.0354,0.0399,0.07])
                     exit_num += 1
                 else:
@@ -500,7 +502,7 @@ def tupo(r):
 
 def backRoot(r):
     real_r:list[float] = r.keys()
-    xy = None
+    xy = [0,0,0,0]
 
     if yys_config.click_number % 6 == 0:
         if pos_obj['common-yellow-confirm'] not in real_r:
@@ -520,14 +522,14 @@ def backRoot(r):
         for i in r[pos_obj['common-yellow-confirm']]:
             if i[0] > xy[0]:
                 xy = i
-    if xy == None:
+    if xy == [0,0,0,0]:
         xy = [0.0065,0.61635,0.0295,0.6395]
         yys_config.click_number += 1
     click_xy(xy)
 
 def enter(r,location):
     real_r:list[float] = r.keys()
-    xy = None
+    xy = [0,0,0,0]
     if location == location_codes['tupo']: # 突破按钮
         xy = r[pos_obj['realm-logo']][0]
     elif location == location_codes['k28_box']:
@@ -555,7 +557,7 @@ def enter(r,location):
             xy = r[k28_obj["tansuo_combat"]][0]
         elif pos_obj['k28-success-box'] in real_r:
             xy = r[pos_obj['k28-success-box']][0]
-    if xy != None:
+    if xy != [0,0,0,0]:
         click_xy(xy)
     else:
         print('未能找到想要进入的场景入口按钮，继续尝试...')
@@ -612,36 +614,38 @@ def huijuan():
             if yys_config.location != location_codes['tansuo']:
                 enter(r,location_codes['tansuo'])
             else:
-                yys_config.step += 1
+                enter(r,location_codes['k28_box']) # temp use
+                yys_config.step += 3
                 yys_config.click_number = 1
-                continue
+                # continue    temp cancel
         elif yys_config.step == 1:
-        # 获取突破剩余次数
-            if not get_tickets(yys_config.image):
-                print("突破票初始化失败，再次尝试。。。")
-            if yys_config.tupo_ticket > 9:
-                enter(r,location_codes['tupo'])
-                yys_config.step += 1
-            else:
-                enter(r,location_codes['k28_box'])
-                yys_config.step += 2
+        # # 获取突破剩余次数
+        #     if not get_tickets(yys_config.image):
+        #         print("突破票初始化失败，再次尝试。。。")
+        #     if yys_config.tupo_ticket > 9:
+        #         enter(r,location_codes['tupo'])
+        #         yys_config.step += 1
+        #     else:
+        #         enter(r,location_codes['k28_box'])
+        #         yys_config.step += 2
+            pass
         elif yys_config.step == 2:
-        # 突破
-            if yys_config.location != location_codes['tupo'] and yys_config.location != location_codes['settlement'] \
-                and location_codes['attack']:
-                yys_config.step = 0
-            elif yys_config.tupo_ticket > 0:
-                tupo(r)
-                if yys_config.location == location_codes['tupo'] or yys_config.location == location_codes['tansuo']:
-                    get_tickets(yys_config.image)
-                # print("突破票初始化失败，再次尝试。。。")
-            else:
-                yys_config.step = 0
+            pass
+        # # 突破
+        #     if yys_config.location != location_codes['tupo'] and yys_config.location != location_codes['settlement'] \
+        #         and location_codes['attack']:
+        #         yys_config.step = 0
+        #     elif yys_config.tupo_ticket > 0:
+        #         tupo(r)
+        #         if yys_config.location == location_codes['tupo'] or yys_config.location == location_codes['tansuo']:
+        #             get_tickets(yys_config.image)
+        #         # print("突破票初始化失败，再次尝试。。。")
+        #     else:
+        #         yys_config.step = 0
         elif yys_config.step == 3:
-            # k28直到突破票满
-            if yys_config.location == location_codes['tansuo'] and yys_config.location == location_codes['tupo']:
+            if yys_config.location == location_codes['tansuo'] or yys_config.location == location_codes['tupo']:
                 yys_config.step = 0
-            elif yys_config.tupo_ticket < 18:
+            else:
                 if yys_config.location != location_codes['k28_box']:
                     yys_config.step = 0
                 else:
@@ -649,6 +653,18 @@ def huijuan():
                         k28()
                 if yys_config.location == location_codes['k28_box'] or yys_config.location == location_codes['tansuo']:
                     get_tickets(yys_config.image)
-            else:
-                yys_config.step = 0
+
+            # # k28直到突破票满
+            # if yys_config.location == location_codes['tansuo'] and yys_config.location == location_codes['tupo']:
+            #     yys_config.step = 0
+            # elif yys_config.tupo_ticket < 18:
+            #     if yys_config.location != location_codes['k28_box']:
+            #         yys_config.step = 0
+            #     else:
+            #         if k28_enter_check(r):
+            #             k28()
+            #     if yys_config.location == location_codes['k28_box'] or yys_config.location == location_codes['tansuo']:
+            #         get_tickets(yys_config.image)
+            # else:
+            #     yys_config.step = 0
         result,message,r,yys_config.image = identify() # 判断当前位置

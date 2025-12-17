@@ -19,3 +19,6 @@ __pycache__/util.cpython-311.pyc
 pyc
 */*.pyc
 *\*\*\*.pyc
+windows-capture.dll
+windows-capture*.dll
+.vscode

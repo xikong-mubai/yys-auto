@@ -58,6 +58,7 @@ def flag_choose():
     elif flag == '2':
         yys_config.flag |= 2
         windows = check_child_windows(yys_config.yys_window_hwnd)
+        print(windows)
         yys_config.yys_click_window = windows[1][0][0]
 
 def error_exit():
@@ -94,8 +95,8 @@ def check_user(user_name:str):
 
 def mouse_click(window_hwnd,position:list):
     x_left,x_right,y_left,y_right = position
-    x=rand_num(int(x_left * yys_config.init_x),int(x_right * yys_config.init_x))
-    y=rand_num(int(y_left * yys_config.init_y),int(y_right * yys_config.init_y))
+    x=rand_num(int(x_left * yys_config.global_x),int(x_right * yys_config.global_x))
+    y=rand_num(int(y_left * yys_config.global_y),int(y_right * yys_config.global_y))
     if yys_config.flag % 2 == 1:
         print("\n点击位置：",x,y)
     try:

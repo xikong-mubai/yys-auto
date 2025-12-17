@@ -25,7 +25,7 @@ for f in my_folders:
     datas.append((f, f))
 
 # 这是要额外复制的文件
-my_files = ['version', 'yysauto.json','readme.txt']
+my_files = ['version', 'yysauto.json','readme.txt','windows-capture.dll']
 for f in my_files:
     datas.append((f, '.'))      # 复制到打包导出的根目录
     

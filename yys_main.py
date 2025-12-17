@@ -46,6 +46,7 @@ def choose_windows(windows):
                 print(e)
     yys_config.yys_window_hwnd = windows[choose][0]
     yys_config.yys_click_window = windows[choose][0]
+    yys_config.yys_window_xy = windows[choose][3]
     init_capture_handle(windows[choose][0])
 
 def dpi_init():
@@ -63,16 +64,17 @@ def position_init(huijuan_flag):
     dpi = (yys_config.dst_dpi*yys_config.sys_dpi)
     yys_config.dpi = dpi
     dpi = 1.5 if dpi == 1 and huijuan_flag == 1 else 1
-    yys_config.init_x *= dpi ; yys_config.init_y *= dpi
-    yys_config.init_x = int(yys_config.init_x) ; yys_config.init_y = int(yys_config.init_y)
-    # config.chang_bordering = int(config.chang_bordering) +1 if config.chang_bordering - int(config.chang_bordering) > 0 else int(config.chang_bordering)
-    # config.chang_top = int(config.chang_top) +1 if config.chang_top - int(config.chang_top) > 0 else int(config.chang_top)
-    yys_config.global_x = yys_config.init_x + yys_config.chang_bordering * 2 + 2
-    yys_config.global_y = yys_config.init_y + yys_config.chang_top + yys_config.chang_bordering * 2 + 2
-    yys_config.chang_bordering,yys_config.chang_top = int(yys_config.chang_bordering*yys_config.dpi),int(yys_config.chang_top*yys_config.dpi)
-    print("预设窗口宽高为：",yys_config.global_x,yys_config.global_y)
-    print("初始化窗口位置...")
-    init_window_pos(yys_config.yys_window_hwnd,yys_config.global_x,yys_config.global_y)
+    yys_config.global_x =  yys_config.init_x * dpi ; yys_config.global_y = yys_config.init_y * dpi
+    yys_config.global_x = int(yys_config.global_x) ; yys_config.global_y = int(yys_config.global_y)
+    # # config.chang_bordering = int(config.chang_bordering) +1 if config.chang_bordering - int(config.chang_bordering) > 0 else int(config.chang_bordering)
+    # # config.chang_top = int(config.chang_top) +1 if config.chang_top - int(config.chang_top) > 0 else int(config.chang_top)
+    # yys_config.chang_bordering,yys_config.chang_top = int(yys_config.chang_bordering*yys_config.dpi),int(yys_config.chang_top*yys_config.dpi)
+    # yys_config.global_x = yys_config.init_x + yys_config.chang_bordering * 2 + 2
+    # yys_config.global_y = yys_config.init_y + yys_config.chang_top + yys_config.chang_bordering * 2 + 2
+    # print("预设窗口宽高为：",yys_config.global_x,yys_config.global_y)
+    print("初始化窗口位置(size: ",yys_config.global_x,yys_config.global_y,")...")
+    init_window_pos(yys_config.yys_window_hwnd,yys_config.global_x,yys_config.global_y,
+                    yys_config.yys_window_xy[0],yys_config.yys_window_xy[1])
     print("初始化窗口完成")
 
 def main():

@@ -14,12 +14,16 @@ init_capture = dll.init_capture
 #update_frame= dll.update_frame
 get_frame = dll.get_frame
 stop_capture = dll.stop_capture
+set_client_size = dll.set_client_size
+# (HWND hwnd, LONG desiredClientWidth, LONG desiredClientHeight, int x, int y)
 
 init_capture.argtypes = [ctypes.c_void_p]
 get_frame.argtypes = [ctypes.POINTER(ctypes.c_uint8), ctypes.c_int,
                       ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int),
                       ctypes.POINTER(ctypes.c_uint64)]
 get_frame.restype = ctypes.c_bool
+set_client_size.argtypes = [ctypes.c_void_p,ctypes.c_long,ctypes.c_long,
+                            ctypes.c_int,ctypes.c_int]
 #update_frame.restype = ctypes.c_bool
 
 import win32gui,win32ui,win32con,win32api,win32print,win32process
@@ -44,14 +48,41 @@ def get_system_dpi(window_hwnd):
     a = -1 if a.value == 4294967295 else a.value
     return dpi,float(a)
 
-def init_window_pos(window_hwnd,x,y):
-    try:
-        win32gui.SetWindowPos(window_hwnd, win32con.HWND_NOTOPMOST, 0, 0, x, y, win32con.SWP_SHOWWINDOW)#win32con.SWP_NOACTIVATE|win32con.SWP_SHOWWINDOW)
-        sleep(0.5)
-    except Exception as e:
-        print("init_window_pos error",e)
-        input("输入任意键退出")
-        exit()
+def init_window_pos(window_hwnd,w,h,x,y):
+    hwnd = ctypes.c_void_p(window_hwnd)
+
+    # user32 = ctypes.windll.user32
+    # AdjustWindowRectExForDpi = user32.AdjustWindowRectExForDpi
+    # AdjustWindowRectExForDpi.argtypes = [ctypes.POINTER(ctypes.wintypes.RECT),
+    #                                     ctypes.wintypes.DWORD, ctypes.wintypes.BOOL,
+    #                                     ctypes.wintypes.DWORD, ctypes.wintypes.UINT]
+    # AdjustWindowRectExForDpi.restype = ctypes.wintypes.BOOL
+    # # 获取 style 和 exStyle
+    # GWL_STYLE = -16
+    # GWL_EXSTYLE = -20
+    # style = user32.GetWindowLongW(hwnd, GWL_STYLE)
+    # exStyle = user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
+    # dpi = user32.GetDpiForWindow(hwnd)
+    # rect = ctypes.wintypes.RECT(0, 0, w, h)
+    # AdjustWindowRectExForDpi(ctypes.byref(rect), style, False, exStyle, dpi)
+    # winWidth = rect.right - rect.left
+    # winHeight = rect.bottom - rect.top
+    # # 设置窗口
+    # SWP_NOZORDER   = 0x0004
+    # SWP_NOACTIVATE = 0x0010
+    # #user32.SetWindowPos(hwnd, None, x, y, winWidth, winHeight, SWP_NOZORDER | SWP_NOACTIVATE)
+    # print(w,h,dpi,rect.left,rect.top,rect.right,rect.bottom)
+    # win32gui.SetWindowPos(window_hwnd, win32con.HWND_NOTOPMOST, x, y, winWidth, winHeight, win32con.SWP_SHOWWINDOW)#win32con.SWP_NOACTIVATE|win32con.SWP_SHOWWINDOW)
+    w = ctypes.c_long(w) ; h = ctypes.c_long(h)
+    x = ctypes.c_int(x) ; y = ctypes.c_int(y)
+    set_client_size(hwnd,w,h,x,y)
+    # try:
+    #     win32gui.SetWindowPos(window_hwnd, win32con.HWND_NOTOPMOST, 0, 0, x, y, win32con.SWP_SHOWWINDOW)#win32con.SWP_NOACTIVATE|win32con.SWP_SHOWWINDOW)
+    #     sleep(0.5)
+    # except Exception as e:
+    #     print("init_window_pos error",e)
+    #     input("输入任意键退出")
+    #     exit()
 
 def _callback( hwnd, extra ):
     windows = extra
@@ -84,7 +115,7 @@ def check_child_windows(win_handle):
     windows = {} ; length = 0 ; dst = []
     win32gui.EnumChildWindows(win_handle,_callback, windows)
     for item in windows:
-        if 'MuMuPlayer' == windows[item][2]:
+        if 'MuMuPlayer' == windows[item][2] or "MuMuNxDevice" == windows[item][2]:
             dst.append(windows[item])
             length += 1
     if length == 0:
@@ -144,7 +175,7 @@ def get_windows() -> Image.Image|None:
                     img_array = img_array[:width.value * height.value * 3]  # 截取有效数据
                     img_array = img_array.reshape((height.value, width.value, 3))
                     img = Image.fromarray(img_array, 'RGB')
-                    sleep(0.005)
+                    sleep(0.03)
                     return img
                 except Exception as e:
                     print("Image decode error:", e)

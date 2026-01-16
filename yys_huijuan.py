@@ -25,7 +25,7 @@ def model_init():
     print("初始化AI模型...")
     try:
         model_k28 = YOLOv10("./models/k28.pt")
-        model_tupo = YOLOv10('./models/last.pt')
+        model_tupo = YOLOv10('./models/best.pt')
         print("初始化成功")
     except Exception as e:
         print("模型加载出现问题：",e)
@@ -270,7 +270,20 @@ def location_change(message):
 def identify():
     while True:
         get_windows()
-        image = get_windows()
+        #image = get_windows()
+        # --- 修改开始 ---
+        # 循环等待，直到获取到有效图片
+        image = None
+        for _ in range(100): # 尝试 100 次，约 1-2 秒
+            image = get_windows()
+            if image is not None:
+                break
+            sleep(0.02) # 等待 DLL 回调填充 buffer
+        
+        if image is None:
+            print("获取画面失败，跳过本次识别...")
+            continue # 跳过本次循环，不传给 YOLO
+        # --- 修改结束 ---
         try:
             if yys_config.location == location_codes['k28'] and yys_config.k28_state == state['choose']:
                 result,message,r = k28_check(image) # 判断当前画面并返回结果
@@ -296,7 +309,7 @@ def k28_enter_check(r):
             if r is not None and pos_obj['common-yellow-confirm'] in r.keys():
                 if len(r[pos_obj['common-yellow-confirm']]) == 1:
                     click_xy([0.3568,0.3037,0.3772,0.3241])
-                enter(r,7)
+            enter(r,7)
             sleep(1)
             _,__,r,yys_config.image = identify()
         else:

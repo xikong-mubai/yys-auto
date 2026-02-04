@@ -10,7 +10,7 @@ def draw_annotation(img, annot:dict):
     classes_path: `class`文件的path
     """
     class_names = ['again-attack', 'attack-exit', 'auto-logo', 'buff-logo', 'common-blue-exit', 'common-box-confirm', 'common-red-cancel', 'common-red-exit', 'common-yellow-confirm', 'e-mail', 'failed-logo', 'flame', 'goxie-accept', 'goxie-logo', 'goxie-refuse', 'huijuan-big', 'huijuan-normal', 'huijuan-small', 'k28-box-big', 'k28-box-small', 'k28-success-box', 'ready', 'realm-again', 'realm-logo', 'realm-success', 'realm-ticket', 'realm-wait', 'royal-logo', 'shiki-dir', 'soul-logo', 'success-damo', 'willpower', 'world-message']
-    # class_names = ['tansuo_combat', 'tansuo_damo', 'tansuo_jinbi', 'tansuo_jingyan']
+    #class_names = ['tansuo_combat', 'tansuo_damo', 'tansuo_jinbi', 'tansuo_jingyan']
     num_classes = len(class_names)
     
     print(annot)
@@ -161,7 +161,7 @@ def self_dedup(r):
 
 def k28_check(image):
     try:
-        result = model_k28(image,imgsz=320,conf=0.25)
+        result = model_k28(image,imgsz=320,conf=0.3)
     except Exception as e:
         print("模型识别遇到问题",e)
         return False,e,None

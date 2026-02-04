@@ -10,6 +10,9 @@ DLL_PATH = "./windows-capture.dll"
 #dll = ctypes.WinDLL(DLL_PATH)
 dll = ctypes.cdll.LoadLibrary(DLL_PATH)
 
+# 全局停止标志
+_is_stopping = False
+
 init_capture = dll.init_capture
 #update_frame= dll.update_frame
 get_frame = dll.get_frame
@@ -156,9 +159,15 @@ CALLBACK_TYPE = ctypes.WINFUNCTYPE(None)
 # 定义 Python 回调函数
 @CALLBACK_TYPE
 def on_new_frame():
-    # print("New frame arrived!")
-    frame_ready.set()
-    # 可以在这里设置事件或触发 UI 刷新
+    # 如果正在停止，绝对不要执行任何 Python 对象操作，直接返回
+    if _is_stopping:
+        return
+    try:
+        # print("New frame arrived!")
+        frame_ready.set()
+        # 可以在这里设置事件或触发 UI 刷新
+    except:
+        pass
 # 注册回调函数到 DLL
 dll.register_frame_callback(on_new_frame)
 
@@ -184,6 +193,27 @@ def get_windows() -> Image.Image|None:
     return None
 
 import atexit
-def exit_stop():
-    stop_capture()
-atexit.register(exit_stop)
+# 暂时废弃
+# def exit_stop():
+#     stop_capture()
+# atexit.register(exit_stop)
+#
+
+# 新的释放资源函数
+def release_capture():
+    """显式释放资源的函数，替代 exit_stop"""
+    global _is_stopping
+    if _is_stopping:
+        return
+    
+    print("正在释放截图资源...")
+    _is_stopping = True # 1. 先告诉回调函数别跑了
+    
+    # 2. 尝试停止 DLL
+    # 注意：为了防止死锁，这里不建议死等，或者应该在 C++ 层做非阻塞处理
+    # 如果您的 DLL stop_capture 是阻塞 join 的，这里依然有风险
+    # 但由于 callback 已经被 flag 阻断，死锁概率大大降低
+    try:
+        stop_capture()
+    except Exception as e:
+        print(f"释放资源时出错 (可能已释放): {e}")

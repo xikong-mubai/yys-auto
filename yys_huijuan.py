@@ -560,11 +560,12 @@ def enter(r,location):
         else:
             xy = r[pos_obj['common-yellow-confirm']][0]
     elif location == 7: # 最右侧的黄色
-        if len(r[pos_obj['common-yellow-confirm']]) != 0:
-            xy = [0,0,0,0]
-        for i in r[pos_obj['common-yellow-confirm']]:
-            if i[0] >= xy[0]:
-                xy = i
+        if pos_obj['common-yellow-confirm'] in r:
+            if len(r[pos_obj['common-yellow-confirm']]) != 0:
+                xy = [0,0,0,0]
+            for i in r[pos_obj['common-yellow-confirm']]:
+                if i[0] >= xy[0]:
+                    xy = i
     elif location == 8: # k28怪物或者纸人奖励
         if k28_obj['tansuo_combat'] in real_r:
             xy = r[k28_obj["tansuo_combat"]][0]

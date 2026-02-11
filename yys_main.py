@@ -6,6 +6,7 @@ help,check_user,error_exit,update,action
 from yys_windows import check_windows,get_system_dpi,init_window_pos,\
     init_capture_handle
 from yys_huijuan import huijuan
+from yys_huijuan_fsm import GameEngine  # <--- 导入新模块
 
 def save_img():
     num = 0
@@ -127,7 +128,14 @@ def main():
             except Exception as e:
                 print(e)
             yys_config.score = score
-            huijuan()
+            
+            # --- 【修改点】启动新的状态机 ---
+            print("正在启动新版 FSM 引擎...")
+            engine = GameEngine()
+            engine.start() # 这是一个阻塞的死循环，直到按 Ctrl+C
+            
+            # 原有的调用注释掉
+            # huijuan() 
         else:
             position_init(0)
             if choose.isdigit():

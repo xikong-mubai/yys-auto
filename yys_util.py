@@ -108,7 +108,7 @@ def mouse_click(window_hwnd,position:list):
         win32api.SendMessage(window_hwnd,win32con.WM_LBUTTONUP,0,(y << 16)+x)
     except Exception as e:
         print(e)
-    sleep(0.1)
+    #sleep(0.1)
 
 
 def get_img_pixel_list(img:Image.Image,check_area:list):

@@ -118,7 +118,7 @@ def check_child_windows(win_handle):
     windows = {} ; length = 0 ; dst = []
     win32gui.EnumChildWindows(win_handle,_callback, windows)
     for item in windows:
-        if 'MuMuPlayer' == windows[item][2] or "MuMuNxDevice" == windows[item][2]:
+        if 'MuMuPlayer' == windows[item][2] or "MuMuNxDevice" == windows[item][2] or "NemuPlayer" == windows[item][2]:
             dst.append(windows[item])
             length += 1
     if length == 0:
@@ -184,7 +184,7 @@ def get_windows() -> Image.Image|None:
                     img_array = img_array[:width.value * height.value * 3]  # 截取有效数据
                     img_array = img_array.reshape((height.value, width.value, 3))
                     img = Image.fromarray(img_array, 'RGB')
-                    sleep(0.03)
+                    sleep(0.02)
                     return img
                 except Exception as e:
                     print("Image decode error:", e)

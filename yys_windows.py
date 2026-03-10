@@ -118,7 +118,7 @@ def check_child_windows(win_handle):
     windows = {} ; length = 0 ; dst = []
     win32gui.EnumChildWindows(win_handle,_callback, windows)
     for item in windows:
-        if 'MuMuPlayer' == windows[item][2] or "MuMuNxDevice" == windows[item][2] or "NemuPlayer" == windows[item][2]:
+        if 'MuMuPlayer' == windows[item][2] or "MuMuNxDevice" == windows[item][2] or "NemuPlayer" == windows[item][2] or "dnplayer" == windows[item][2]:
             dst.append(windows[item])
             length += 1
     if length == 0:

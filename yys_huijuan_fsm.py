@@ -5,7 +5,8 @@ from ultralytics import YOLOv10
 
 # 引入原有项目依赖
 import yys_config
-from yys_util import get_windows, mouse_click, sleep, get_tickets
+from yys_util import get_windows, mouse_click, sleep, get_tickets, system
+from os import path
 from yys_windows import release_capture
 
 # ==============================================================================
@@ -44,6 +45,20 @@ class GameContext:
         try:
             self.model_k28 = YOLOv10("./models/k28.pt")
             self.model_general = YOLOv10('./models/best.pt') # 假设 last.pt 是通用检测
+
+            if path.exists('./OCR'):
+                if path.exists('./OCR/Umi-OCR.exe'):
+                    system(".\\OCR\\Umi-OCR.exe  --hide")
+                    sleep(1)
+                else:
+                    print(">>> 未在 OCR 文件夹下找到 Umi-OCR.exe 程序，请检查")
+                    input('按任意键退出')
+                    exit()
+            else:
+                print(">>> 未在 ./yys 下找到 OCR 文件夹，请检查")
+                input('按任意键退出')
+                exit()            
+
             print(">>> [FSM] 模型加载完成")
         except Exception as e:
             print(f">>> [错误] 模型加载失败: {e}")
@@ -210,6 +225,10 @@ class BaseState(ABC):
                 cy = (b[1] + b[3]) / 2
                 return (cx - 0.5)**2 + (cy - 0.5)**2
             return min(box_list, key=dist_to_center)
+        elif rule == "short":
+            def dist_to_short(b):
+                return b[2]-b[0]
+            return min(box_list, key=dist_to_short)
 
         # 默认返回第一个
         return box_list[0]
@@ -261,10 +280,10 @@ class StateExploration(BaseState):
         if realm_logo in res and self.ctx.situation == 1:
             print("\n>>> 突破门票达标，进入突破")
             target = self.find_best_click_pos(res[realm_logo], rule='bottom')
-            self.click_xy( target)
+            self.click_xy(target)
             # return StateTupoList(self.ctx) # 突破界面和k28入口界面很像，可以先切到k28入口的状态逻辑里再细分
         # [场景D] 发现k28入口 -> 点击 -> 进入k28入口
-        if k28_box_small in res and realm_logo in res:
+        elif k28_box_small in res and realm_logo in res:
             self.k28Box_small_count += 1
             if self.k28Box_small_count >= 6:
                 print("\n>>> 发现k28入口，点击进入")
@@ -335,7 +354,7 @@ class StateTupoList(BaseState):
         realm_success = self.ctx.pos_obj.get('realm-success', -1.0)
         wait_targets, again_targets, success_targets = self._tupo_pos_check(res,realm_wait,realm_again,realm_success)
         self.ctx.realm_target_num = len(wait_targets)+ len(again_targets)
-        if self.ctx.realm_target_num + len(success_targets) < 9 and self.ctx.realm_target_num > 0:
+        if self.ctx.realm_target_num + len(success_targets) != 9 :#and self.ctx.realm_target_num > 0:
             print(">>> 识别出现问题，建议关闭突破功能等待优化后使用...\a")
 
         # [场景A] 已经回到探索界面了 (有时候点击了但没反应过来)
@@ -346,27 +365,28 @@ class StateTupoList(BaseState):
         # [场景B] 可能已经点开突破确认界面了
         confrim_id = self.ctx.pos_obj.get('common-yellow-confirm', -1.0)
         common_box_confirm = self.ctx.pos_obj.get('common-box-confirm', -1.0)
-        if (confrim_id in res and common_box_confirm in res)\
-            or len(res[confrim_id]) >= 2:
+        if confrim_id in res and (common_box_confirm in res or len(res[confrim_id]) >= 2):
             print(">>> 已经进入突破确认界面")
             return StateTupoConfrim(self.ctx)
         # [场景C] 门票耗尽，回到探索界面
         id_exit = self.ctx.pos_obj.get('common-red-exit', -1.0)
-        if id_exit in res:
+        if id_exit in res and self.ctx.realm_tickets == 0:
             print(">>> 突破门票不足，回到探索界面")
+            self.ctx.situation = 0
             target = self.find_best_click_pos(res[id_exit], rule='right')
             self.click_xy(target)
             # sleep(1.0) # 等待动画
             # return StateExploration(self.ctx)
         # [场景D] 优先打未打过的
-        if realm_wait in res:
+        elif realm_wait in res:
             print(">>> 发现新目标准备进攻...")
-            target = self.find_best_click_pos(res[realm_again], rule='left')
+            target = self.find_best_click_pos(wait_targets, rule='left')
             self.click_xy(target)
             #return StateTupoConfrim(self.ctx) # 突破确认界面
+        # [场景D] 其次打多次挑战的
         elif realm_again in res:
             print(">>> 突破界面加载完成，进入突破列表")
-            target = self.find_best_click_pos(res[realm_again], rule='left')
+            target = self.find_best_click_pos(again_targets, rule='left')
             self.click_xy(target)
             #return StateTupoConfrim(self.ctx) # 突破列表界面
         
@@ -390,16 +410,20 @@ class StateTupoConfrim(BaseState):
         res, _ = self.detect(self.ctx.model_general, conf=0.3)
         
         # 3. 决策逻辑
+        # [场景A] 已经进入战斗逻辑了 (有时候点击了但没反应过来)        # [场景A] 可能已经位于战斗界面
+        attack_exit = self.ctx.pos_obj.get('attack-exit', -1.0) # 战斗中途退出的按钮
+        auto_logo = self.ctx.pos_obj.get('auto-logo', -1.0) # 战斗中自动战斗的标志
+        if (attack_exit in res or auto_logo in res):# or flame_id in res_gen:
+            print(">>> 可能已经处于战斗状态")
+            return StateCombat(self.ctx)
+        # [场景B] 点击确认键，进入战斗
         confrim_id = self.ctx.pos_obj.get('common-yellow-confirm', -1.0)
-        
-        # [场景A] 已经进入战斗逻辑了 (有时候点击了但没反应过来)
         if confrim_id in res:
             print(">>> 点击确认按钮")
-            target = self.find_best_click_pos(res[confrim_id], rule='right')
+            target = self.find_best_click_pos(res[confrim_id], rule='short')
             self.click_xy(target)
             sleep(1.0) # 等待动画
-            return StateCombat(self.ctx)
-        # [场景B] 点击确认，进入战斗
+            #return StateCombat(self.ctx)
 
         return self
     
@@ -441,32 +465,33 @@ class StateK28Box(BaseState):
             if self.tansuo_count >= 6:
                 print(">>> 切回探索状态")
                 return StateExploration(self.ctx)
-        # [场景C] 检测突破门票，9的倍数则前往突破
+        # [场景C] 检测突破门票，9的倍数则前往突破，不然继续k28
         realm_ticket = self.ctx.pos_obj.get('realm-ticket', -1.0)
-        if realm_ticket in res:
-            if self.ctx.situation == 0:    
+        if self.ctx.situation == 0:
+            if realm_ticket in res:
                 result, tupo_ticket = get_tickets(self.ctx.current_image)
                 if result and tupo_ticket >= 9:
                     print(">>> 突破门票达标，准备进入突破")
                     # 设置标记位，开始返回探索前往突破
                     self.ctx.situation = 1
                     self.ctx.realm_tickets = tupo_ticket
-            else:
-                common_red_exit = self.ctx.pos_obj.get('common-red-exit', -1.0)
-                if common_red_exit in res:
-                    print(">>> 返回探索...")
-                    target = self.find_best_click_pos(res[common_red_exit], rule='right')
-                    self.click_xy(target)
-                    sleep(0.5) # 等待动画
-        # [场景D] 检测 'k28-box-big' 大盒子，点击确认按钮进入
-        k28_box_big = self.ctx.pos_obj.get('k28-box-big', -1.0)
-        confirm_id = self.ctx.pos_obj.get('common-yellow-confirm', -1.0)
-        if k28_box_big in res and confirm_id in res:
-            print(">>> 发现确认按钮，点击进入k28场景")
-            target = self.find_best_click_pos(res[confirm_id], rule='right')
-            self.click_xy(target)
-            sleep(0.5) # 等待动画
-        
+                    return self
+            # [场景D] 检测 'k28-box-big' 大盒子，点击确认按钮进入k28Zone
+            k28_box_big = self.ctx.pos_obj.get('k28-box-big', -1.0)
+            confirm_id = self.ctx.pos_obj.get('common-yellow-confirm', -1.0)
+            if k28_box_big in res and confirm_id in res:
+                print(">>> 发现确认按钮，点击进入k28场景")
+                target = self.find_best_click_pos(res[confirm_id], rule='right')
+                self.click_xy(target)
+                sleep(0.5) # 等待动画                
+        else:
+            common_red_exit = self.ctx.pos_obj.get('common-red-exit', -1.0)
+            if common_red_exit in res:
+                print(">>> 返回探索...")
+                target = self.find_best_click_pos(res[common_red_exit], rule='right')
+                self.click_xy(target)
+                sleep(0.5) # 等待动画
+
         # 如果啥都没找到，继续等
         return self
 
@@ -667,6 +692,7 @@ class StateCombat(BaseState):
         self.success_detected_num = 0
         self.failure_detected_num = 0
         self.k28_detected_num = 0
+        self.realm_detected_num = 0
 
     def execute(self):
         # 超时保护 (3分钟没动静)
@@ -701,13 +727,28 @@ class StateCombat(BaseState):
             # self.failure_detected_num += 1
             # if self.failure_detected_num >= 3:
             return StateSettlement(self.ctx)
+        # [场景C] 战斗已结束或未发生，返回前一场景
+        buff_logo = self.ctx.pos_obj.get('buff-logo', -1.0) # 结算界面的buff标志
+        common_blue_exit = self.ctx.pos_obj.get('common-blue-exit', -1.0) # 结算界面的退出按钮
+        common_red_exit = self.ctx.pos_obj.get('common-red-exit', -1.0)
+        if common_blue_exit in res and buff_logo in res:
+            self.k28_detected_num += 1
+            if self.k28_detected_num >= 3:
+                print(">>> 可能并未发生战斗，切换回k28界面")
+                return StateK28Zone(self.ctx)
+        elif common_red_exit in res:
+            self.realm_detected_num += 1
+            if self.realm_detected_num >= 3:
+                print(">>> 可能并未发生战斗，切换回突破界面")
+                return StateTupoList(self.ctx)
 
         attack_exit = self.ctx.pos_obj.get('attack-exit', -1.0) # 战斗中途退出的按钮
+        auto_logo = self.ctx.pos_obj.get('auto-logo', -1.0) # 战斗中自动战斗的标志
         # [场景C] 本轮突破仅剩最后一个目标，需要投降4次避免对手升级
         if self.ctx.situation == 1 and self.ctx.realm_target_num == 1:
             common_red_cancel = self.ctx.pos_obj.get('common-red-cancel', -1.0) # 投降确认框的取消按钮
             if common_red_cancel in res:
-                print(">>> 突破仅剩最后一个目标，点击投降...")
+                print(">>> 已发现投降确认按钮，点击投降...")
                 target = self.find_best_click_pos(res[common_red_cancel], rule='right')
                 self.click_xy(target) # 点击投降按钮
                 sleep(0.1) # 等待动画
@@ -717,22 +758,8 @@ class StateCombat(BaseState):
                 self.click_xy(target) # 点击退出按钮
                 sleep(0.1) # 等待动画
         # [场景D] 战斗中 or 并未发生战斗
-        auto_logo = self.ctx.pos_obj.get('auto-logo', -1.0) # 战斗中自动战斗的标志
-        buff_logo = self.ctx.pos_obj.get('buff-logo', -1.0) # 结算界面的buff标志
-        common_blue_exit = self.ctx.pos_obj.get('common-blue-exit', -1.0) # 结算界面的退出按钮
-        if attack_exit in res and auto_logo in res:
+        elif attack_exit in res and auto_logo in res:
             print(">>> 战斗中")
-        elif common_blue_exit in res and buff_logo in res:
-            self.k28_detected_num += 1
-            if self.k28_detected_num >= 3:
-                print(">>> 可能并未发生战斗，切换回",end="")
-                if self.ctx.situation == 1:
-                    print("突破界面")
-                    return StateTupoList(self.ctx)
-                else:
-                    print("k28界面")
-                    return StateK28Zone(self.ctx)
-            
 
 
         return self

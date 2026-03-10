@@ -1,12 +1,14 @@
 from yys_windows import ctypes,win32gui,win32ui,win32con,win32api,win32process\
-    ,sleep,array,check_child_windows,get_windows
-from PIL import Image
+    ,sleep,array,check_child_windows,get_windows, Image
 # 获取权限
 from sys import exit
 from os import system
 from socket import socket
 from random import randint
 import yys_config
+from base64 import b64encode
+from io import BytesIO
+from requests import post
 
 yys_window_name = "阴阳师-网易游戏"
 tempimg_name = "123.png"
@@ -195,3 +197,40 @@ def action(action:dict):
                     x_left,x_right,y_left,y_right = action[i]["click_area"]
                     mouse_click(yys_config.yys_click_window,[x_left,x_right,y_left,y_right])
                     sleep(0.3)
+
+
+def get_tickets(image):
+    image_data = BytesIO()
+    image.save(image_data,"png")
+    tupo_ticket = 0
+    data = {
+        "base64": b64encode(image_data.getvalue()).decode(),
+        "options": {
+            "ocr.language": "models/config_chinese.txt",
+            "ocr.cls": 'true',
+            "ocr.limit_side_len": 4320,
+            "tbpu.parser": "multi_none",
+            "data.format": "text"
+        }
+    }
+    for _ in range(5):
+        r_result = post("http://127.0.0.1:1224/api/ocr",json=data)
+        if r_result.status_code == 200:
+            result_message = r_result.json()
+            if result_message["code"] == 100:
+                for i in r_result.content.split(b' '):
+                    if b'/30' in i:
+                        tmp_num = i.split(b'/30')[0][-2:]
+                        if len(tmp_num) == 2:
+                            if tmp_num[0] > 47 and tmp_num[0] < 58:
+                                tupo_ticket = int(tmp_num.decode())
+                            else:
+                                tupo_ticket = tmp_num[1] - 48
+                        else:
+                            tupo_ticket = tmp_num[0]-48
+                        break
+                break
+    else:
+        print("图像识别未检测到突破票，请检查问题")
+        return False,tupo_ticket
+    return True,tupo_ticket

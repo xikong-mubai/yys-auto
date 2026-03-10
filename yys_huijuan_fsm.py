@@ -22,10 +22,12 @@ class GameContext:
         self.current_image = None
         self.yolo_results = None  # 缓存最近一次识别结果
         self.frame_id = 0         # 逻辑帧计数器
+        # self.pre_ctx = None
         
         # 统计数据
         self.loop_count = 0       # 刷本次数
         self.target_count = 0     # 目标次数 (从配置读或输入)
+        self.move_count = 0 ; self.k28_exit_flag = 0
         
         # 加载配置中的坐标映射 (直接引用 yys_config 中的定义)
         self.pos_obj = yys_config.pos_obj
@@ -56,6 +58,11 @@ class GameContext:
             self.frame_id += 1
             return True
         return False
+    
+    def init_k28_count(self):
+        self.move_count = 0
+        self.k28_exit_flag = 0
+
 
 
 # ==============================================================================
@@ -220,6 +227,7 @@ class BaseState(ABC):
 class StateExploration(BaseState):
     def on_enter(self):
         print(f"\r>>> [状态] 探索中... (已完成: {self.ctx.loop_count})", end="")
+        self.k28Box_small_count = 0
 
     def execute(self):
         # 1. 刷新画面
@@ -233,7 +241,7 @@ class StateExploration(BaseState):
         #k28_combat_id = self.ctx.k28_obj.get('tansuo_combat', -1.0)
         k28_box_small = self.ctx.pos_obj.get('k28-box-small', -1.0) # 纸人小盒子
         k28_box_big = self.ctx.pos_obj.get('k28-box-big', -1.0) # 这里的 key 需要确认是否为探索界面的确认
-        tupo_entry = self.ctx.pos_obj.get('realm-logo', -1.0) # 突破入口
+        realm_logo = self.ctx.pos_obj.get('realm-logo', -1.0) # 突破入口
         realm_wait = self.ctx.pos_obj.get('realm-wait', -1.0) # 突破准备界面
         realm_again = self.ctx.pos_obj.get('realm-again', -1.0) # 突破列表界面
         realm_success = self.ctx.pos_obj.get('realm-success', -1.0) # 突破成功界面
@@ -247,17 +255,27 @@ class StateExploration(BaseState):
             print("\n>>> 已经进入突破列表界面，切换状态")
             return StateTupoList(self.ctx)
         # [场景C] 突破门票足够，进入突破界面
-        if tupo_entry in res:
+        if realm_logo in res:
             print("\n>>> 突破门票达标，进入突破")
-            target = self.find_best_click_pos(res[tupo_entry], rule='bottom')
+            target = self.find_best_click_pos(res[realm_logo], rule='bottom')
             self.click_xy( target)
             # return StateTupoList(self.ctx) # 突破界面和k28入口界面很像，可以先切到k28入口的状态逻辑里再细分
         # [场景D] 发现k28入口 -> 点击 -> 进入k28入口
-        if k28_box_small in res:
-            print("\n>>> 发现k28入口，点击进入")
-            target = self.find_best_click_pos(res[k28_box_small], rule='bottom')
-            self.click_xy( target)
-            # return StateK28Box(self.ctx)
+        if k28_box_small in res and realm_logo in res:
+            self.k28Box_small_count += 1
+            if self.k28Box_small_count >= 6:
+                print("\n>>> 发现k28入口，点击进入")
+                target = self.find_best_click_pos(res[k28_box_small], rule='bottom')
+                self.click_xy( target)
+                sleep(0.5) # 等待动画
+                # return StateK28Box(self.ctx)
+
+        # [场景C] 突破门票足够，进入突破界面
+        # if tupo_entry in res:
+        #     print("\n>>> 突破门票达标，进入突破")
+        #     target = self.find_best_click_pos(res[tupo_entry], rule='bottom')
+        #     self.click_xy( target)
+        #     return StateTupoList(self.ctx) # 突破界面和k28入口界面很像，可以先切到k28入口的状态逻辑里再细分
         
         return self
 
@@ -357,6 +375,8 @@ class StateTupoConfrim(BaseState):
 class StateK28Box(BaseState):
     def on_enter(self):
         print(">>> [状态] K28 入口界面")
+        self.tansuo_count = 0
+        self.k28_count = 0
 
     def execute(self):
         # 1. 刷新画面
@@ -369,14 +389,24 @@ class StateK28Box(BaseState):
         # 3. 决策逻辑
         # [场景A] 如果已经在 K28 场景 (有时候点击了但没反应过来)
         sd_id = self.ctx.pos_obj.get('shiki-dir', -1.0) # 这里的 key 需要确认是否为探索界面的确认
-        if sd_id in res:
-             print("\n>>> 已位于k28")
-             return StateK28Zone(self.ctx)
-        # [场景B] 切回探索状态
+        blue_exit = self.ctx.pos_obj.get('common-blue-exit',-1.0)
+        if sd_id in res and blue_exit in res:
+            self.k28_count += 1
+            if self.k28_count >= 6:
+                print("\n>>> 已位于k28，切换状态")
+                tmp = StateK28Zone(self.ctx)
+                tmp.ctx.init_k28_count() # 进入k28场景时重置计数
+                return tmp #StateK28Zone(self.ctx)
+        
+        # [场景B] 可能是点击失效了，还在探索界面，切回探索状态
         k28_box_small = self.ctx.pos_obj.get('k28-box-small', -1.0)
-        if k28_box_small in res:
-            print(">>> 切回探索状态")
-            return StateExploration(self.ctx)   
+        realm_logo = self.ctx.pos_obj.get('realm-logo', -1.0)
+        if k28_box_small in res and realm_logo in res:
+            self.tansuo_count += 1
+            if self.tansuo_count >= 6:
+                print(">>> 切回探索状态")
+                return StateExploration(self.ctx)
+
         # [场景C] 检测突破门票，9的倍数则前往突破
         realm_ticket = self.ctx.pos_obj.get('realm-ticket', -1.0)
         if realm_ticket in res:
@@ -392,9 +422,8 @@ class StateK28Box(BaseState):
             print(">>> 发现确认按钮，点击进入k28场景")
             target = self.find_best_click_pos(res[confirm_id], rule='right')
             self.click_xy(target)
-            sleep(1.0) # 等待动画
-            #return StateK28Zone(self.ctx)
-
+            sleep(0.5) # 等待动画
+        
         # 如果啥都没找到，继续等
         return self
 
@@ -406,8 +435,9 @@ class StateK28Box(BaseState):
 class StateK28Zone(BaseState):
     def on_enter(self):
         print(">>> [状态] K28 场景内 - 智能索敌ing")
-        self.move_count = 0
         self.detect_num = 0
+        self.tansuo_count = 0
+        self.k28Box_count = 0
 
     def execute(self):
         # 1. 刷新画面
@@ -424,15 +454,35 @@ class StateK28Zone(BaseState):
         auto_logo = self.ctx.pos_obj.get('auto-logo', -1.0) # 战斗中自动战斗的标志
         flame_id = self.ctx.pos_obj.get('flame', -1.0) # 可能的目标标志
         # [场景A] 可能已经位于战斗界面
-        if (attack_exit in res_gen and auto_logo in res_gen) or flame_id in res_gen:
-            print(">>> 可能移动时意外触发战斗，进入战斗状态")
+        exit_id = self.ctx.pos_obj.get('common-blue-exit', -1.0)
+        k28Box_id = self.ctx.pos_obj.get('k28-box-big', -1.0)
+        realm_logo = self.ctx.pos_obj.get('realm-logo',-1.0)
+        common_red_exit = self.ctx.pos_obj.get('common-red-exit', -1.0)
+        if (attack_exit in res_gen and auto_logo in res_gen):# or flame_id in res_gen:
+            print(">>> 尝试进入战斗状态")
             return StateCombat(self.ctx)
         
         # [场景B] 实际位于k28Box界面
         k28_box_big = self.ctx.pos_obj.get('k28-box-big', -1.0)
-        if k28_box_big in res_gen:
-            print(">>> 仍在k28入口，切回k28入口状态")
-            return StateK28Box(self.ctx)
+        # if k28_box_big in res_gen:
+        #     print(">>> 仍在k28入口，切回k28入口状态")
+        #     return StateK28Box(self.ctx)
+        if k28Box_id in res_gen and common_red_exit in res_gen:
+            self.k28Box_count += 1
+            if self.k28Box_count >= 3:
+                print(">>> k28可能回到了k28入口界面")
+                return StateK28Box(self.ctx)
+        if exit_id in res_gen and realm_logo in res_gen:
+            self.tansuo_count += 1
+            if self.tansuo_count >= 3:
+                print(">>> k28可能回到了探索界面")
+                return StateExploration(self.ctx)
+        # # [场景A] 实际位于k28Box界面
+        # k28_box_big = self.ctx.pos_obj.get('k28-box-big', -1.0)
+        # if k28_box_big in res_gen:
+        #     print(">>> 仍在k28入口，切回k28入口状态")
+        #     return StateK28Box(self.ctx)
+
 
         # [场景C] 掉落宝箱，点击领取
         k28_success_box = self.ctx.pos_obj.get('k28-success-box', -1.0)
@@ -440,6 +490,7 @@ class StateK28Zone(BaseState):
             print(">>> 发现掉落宝箱，点击领取")
             target = self.find_best_click_pos(res_gen[k28_success_box])
             self.click_xy(target)
+            sleep(0.3)
             return StateCombat(self.ctx)
         
         # [场景D] 检测 达摩/经验加成 目标，点击战斗图标进入战斗
@@ -450,33 +501,41 @@ class StateK28Zone(BaseState):
         combat_boxes = res.get(combat_id, [])
         gold_boxes    = res.get(gold_id, [])
         damo_boxes   = res.get(damo_id, [])
-        if combat_boxes and damo_boxes:
-            target = self.select_optimal_monster(combat_boxes, gold_boxes, damo_boxes)
-            if target:
-                print(f">>> 锁定目标 (优先级策略), 点击进攻")
-                self.click_xy(target)
-                sleep(1.0) # 等待动画
-                return StateCombat(self.ctx)
-            else:
-                print(">>> 未能选出合适目标，继续搜索...")
-                
+        if combat_boxes:
+            if damo_boxes:
+                target = self.select_optimal_monster(combat_boxes, gold_boxes, damo_boxes)
+                if target:
+                    print(f">>> 锁定目标 (优先级策略), 点击进攻")
+                    self.click_xy(target)
+                    sleep(0.2) # 等待动画
+                    return self #StateCombat(self.ctx)
+                else:
+                    print(">>> 未能选出合适目标，继续搜索...")
+        else:
+            if self.ctx.move_count >= 6 and self.ctx.k28_exit_flag == 0:
+                sleep(0.6)
+                self.ctx.k28_exit_flag = 1
+                return self
+
         # [场景C] 存在退出确认框，点击返回k28Box
         confirm_id = self.ctx.pos_obj.get('common-yellow-confirm', -1.0)
-        if confirm_id in res_gen:
+        common_red_exit = self.ctx.pos_obj.get('common-red-exit', -1.0)
+        realm_ticket = self.ctx.pos_obj.get('realm-ticket', -1.0)
+        if confirm_id in res_gen and common_red_exit not in res_gen and realm_ticket not in res_gen:
             print(">>> 发现退出确认框，点击返回k28入口")
             target = self.find_best_click_pos(res_gen[confirm_id], rule='right')
             self.click_xy(target)
-            sleep(1.0) # 等待动画
-            return StateK28Box(self.ctx)
+            # sleep(0.6) # 等待动画
+            # return StateK28Box(self.ctx)
+            return self
 
         # 【场景D】未通关，无宝箱，可能需要移动视角或滑动屏幕，一直未发现目标则退出
         if self.detect_num >= 18:
             self.detect_num = 0
-            if self.move_count < 6:
+            if self.ctx.move_count < 6:
                 print(">>> 未发现目标，尝试滑动屏幕寻找...")
                 self.perform_move()
             else:
-                exit_id = self.ctx.pos_obj.get('common-blue-exit', -1.0)
                 if exit_id in res_gen:
                     print(">>> 没有高收益目标，点击传送门退出")
                     target = self.find_best_click_pos(res_gen[exit_id])
@@ -560,7 +619,7 @@ class StateK28Zone(BaseState):
 
     def perform_move(self):
         """执行移动/滑动逻辑"""
-        self.move_count += 1
+        self.ctx.move_count += 1
         # 每几次尝试点一下右边，模拟移动
         # 注意：这里最好实现真正的 Drag/Swipe，或者点击边缘
         self.click_xy([0.90,0.66,0.95,0.72])
@@ -607,7 +666,7 @@ class StateCombat(BaseState):
             self.success_detected_num += 1
             # 连续确认3次才算真赢了，防止误判
             if self.success_detected_num >= 3:
-                print(">>> 战斗胜利")
+                print(">>> 收菜结算")
                 return StateSettlement(self.ctx)
         # [场景B] 战斗失败
         if failed_logo in res:
@@ -621,7 +680,7 @@ class StateCombat(BaseState):
         elif common_blue_exit in res and buff_logo in res:
             self.k28_detected_num += 1
             if self.k28_detected_num >= 3:
-                print(">>> 并未发生战斗，切换回k28")
+                print(">>> 可能并未发生战斗，切换回k28")
                 return StateK28Zone(self.ctx)
 
         return self
@@ -668,7 +727,7 @@ class StateSettlement(BaseState):
         if common_blue_exit in res and buff_logo in res:
             self.k28_num += 1
             if self.k28_num == 3:
-                print(">>> 战斗结算完成，回到k28场景")
+                print(">>> 战斗结算完成，回到上一场景")
                 #self.ctx.loop_count += 1
                 return StateK28Zone(self.ctx)
         

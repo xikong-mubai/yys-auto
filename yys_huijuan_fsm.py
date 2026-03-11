@@ -30,8 +30,8 @@ class GameContext:
         self.target_count = 0     # 目标次数 (从配置读或输入)
         self.situation = 0         # 场景标记：0，k28；1，突破
         self.move_count = 0 ; self.k28_exit_flag = 0    # k28移动次数；k28退出标记
-        self.realm_tickets = 0
-        self.realm_target_num = 0 ; self.realm_exit_count = 0
+        self.realm_tickets = 0 ; self.realm_target_num = 0
+        self.realm_exit_flag = 1 ; self.realm_exit_count = 0
         
         # 加载配置中的坐标映射 (直接引用 yys_config 中的定义)
         self.pos_obj = yys_config.pos_obj
@@ -724,9 +724,14 @@ class StateCombat(BaseState):
         failed_logo = self.ctx.pos_obj.get('failed-logo', -1.0)
         if failed_logo in res:
             print(">>> 战斗失败")
-            # self.failure_detected_num += 1
-            # if self.failure_detected_num >= 3:
-            return StateSettlement(self.ctx)
+            if self.ctx.situation == 1:
+                self.failure_detected_num += 1
+                if self.failure_detected_num >= 3:
+                    self.ctx.realm_exit_count += 1
+                    self.ctx.realm_exit_flag = 0 if self.ctx.realm_exit_count % 4 == 0 else 1
+                    return StateSettlement(self.ctx)
+            else:
+                return StateSettlement(self.ctx)
         # [场景C] 战斗已结束或未发生，返回前一场景
         buff_logo = self.ctx.pos_obj.get('buff-logo', -1.0) # 结算界面的buff标志
         common_blue_exit = self.ctx.pos_obj.get('common-blue-exit', -1.0) # 结算界面的退出按钮
@@ -752,7 +757,7 @@ class StateCombat(BaseState):
                 target = self.find_best_click_pos(res[common_red_cancel], rule='right')
                 self.click_xy(target) # 点击投降按钮
                 sleep(0.1) # 等待动画
-            elif attack_exit in res:
+            elif attack_exit in res and self.ctx.realm_exit_flag == 1:
                 print(">>> 突破仅剩最后一个目标，投降一次...")
                 target = self.find_best_click_pos(res[attack_exit])
                 self.click_xy(target) # 点击退出按钮
@@ -840,8 +845,8 @@ class StateSettlement(BaseState):
 
         
         # 防死循环
-        if self.click_count > 30:
-             return StateExploration(self.ctx)
+        # if self.click_count > 300:
+        #      return StateExploration(self.ctx)
 
         return self
 

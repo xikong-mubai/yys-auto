@@ -34,7 +34,8 @@ for f in my_files:
 
 a = Analysis(
     ['yys.py'],
-    pathex=['F:\\study\\code\\python\\yys-ai-cpu\\Lib\\site-packages\\torch\\lib'],
+    # pathex=['F:\\study\\code\\python\\yys-ai-cpu\\Lib\\site-packages\\torch\\lib'],
+    pathex=['D:\study\code\py\yolov10-test\yolov10\Lib\site-packages\torch\lib'],
     binaries=[],
     datas=datas,
     hiddenimports=[],
@@ -54,7 +55,7 @@ a.binaries.clear()
 
 # 把所有的 py 文件依赖用 a.datas 复制到 libs 文件夹
 # 可选地保留某些要打包的依赖
-private_module = ['yys_main','yys_windows','yys_util','yys_config','yys_huijuan']                         # hello.exe 不保留任何依赖
+private_module = ['yys_main','yys_windows','yys_util','yys_config','yys_huijuan_fsm']                         # hello.exe 不保留任何依赖
 temp = a.pure.copy(); a.pure.clear()
 for name, src, type in temp:
     condition = [name.startswith(m) for m in private_module]

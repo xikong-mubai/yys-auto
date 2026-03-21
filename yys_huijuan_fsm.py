@@ -30,8 +30,9 @@ class GameContext:
         self.target_count = 0     # 目标次数 (从配置读或输入)
         self.situation = 0         # 场景标记：0，k28；1，突破
         self.move_count = 0 ; self.k28_exit_flag = 0    # k28移动次数；k28退出标记
-        self.realm_tickets = 0 ; self.realm_target_num = 0
-        self.realm_exit_flag = 1 ; self.realm_exit_count = 0
+        self.realm_tickets = 0 ; self.realm_target_num = 0 # 突破门票；当前波次剩余目标数量
+        self.realm_exit_flag = 1 ; self.realm_exit_count = 0 # 突破投降标记；突破投降计数
+        self.goxie_count = 0
         
         # 加载配置中的坐标映射 (直接引用 yys_config 中的定义)
         self.pos_obj = yys_config.pos_obj
@@ -240,7 +241,36 @@ class BaseState(ABC):
         #print(xy)
         mouse_click(yys_config.yys_click_window,xy)
 
+    def handle_global_popups(self, res):
+        """
+        处理全局随机弹窗 (如悬赏协作/勾协)。
+        :param res: 由 model_general 识别出的字典
+        :return: bool, 如果处理了弹窗返回 True，否则返回 False
+        """
+        # 从配置中获取按钮 ID
+        id_accept = self.pos_obj.get('goxie-accept', -1.0)
+        id_refuse = self.pos_obj.get('goxie-refuse', -1.0)
+        id_cancel = self.pos_obj.get('common-red-cancel', -1.0) # 如果有右上角红叉
 
+        if id_accept != -1.0 and id_refuse != -1.0:
+            self.ctx.goxie_count += 1
+
+        if self.ctx.goxie_count >= 3:
+            # 策略：优先点击接受 (或者根据你的需求改为拒绝)
+            if id_accept in res:
+                print("\n>>> [拦截] 发现好友悬赏/协作邀请，自动点击【接受】！")
+                target = self.find_best_click_pos(res[id_accept])
+                # self.click_xy(target)
+            # 如果你想拒绝，或者没有识别到接受，但识别到了拒绝
+            elif id_refuse in res:
+                print("\n>>> [拦截] 发现好友悬赏邀请，自动点击【拒绝】！")
+                target = self.find_best_click_pos(res[id_refuse])
+                self.click_xy(target)
+            self.ctx.goxie_count = 0
+            sleep(0.1) # 等待弹窗消失
+            return True
+            
+        return False
 # ==============================================================================
 # 3. 具体业务状态实现 (以 K28 流程为例)
 # ==============================================================================
@@ -258,6 +288,8 @@ class StateExploration(BaseState):
 
         # 2. 识别 (使用 general 模型)
         res, _ = self.detect(self.ctx.model_general, conf=0.3)
+        if self.handle_global_popups(res):
+            return self # 如果处理了弹窗，直接结束本帧，下一帧重新评估环境
         
         # 3. 决策逻辑
         #k28_combat_id = self.ctx.k28_obj.get('tansuo_combat', -1.0)
@@ -347,6 +379,8 @@ class StateTupoList(BaseState):
 
         # 2. 识别 (使用 general 模型)
         res, _ = self.detect(self.ctx.model_general, conf=0.3)
+        if self.handle_global_popups(res):
+            return self # 如果处理了弹窗，直接结束本帧，下一帧重新评估环境
         
         # 3. 决策逻辑
         realm_wait = self.ctx.pos_obj.get('realm-wait', -1.0)
@@ -408,7 +442,9 @@ class StateTupoConfrim(BaseState):
 
         # 2. 识别 (使用 general 模型)
         res, _ = self.detect(self.ctx.model_general, conf=0.3)
-        
+        if self.handle_global_popups(res):
+            return self # 如果处理了弹窗，直接结束本帧，下一帧重新评估环境
+
         # 3. 决策逻辑
         # [场景A] 已经进入战斗逻辑了 (有时候点击了但没反应过来)        # [场景A] 可能已经位于战斗界面
         attack_exit = self.ctx.pos_obj.get('attack-exit', -1.0) # 战斗中途退出的按钮
@@ -445,6 +481,8 @@ class StateK28Box(BaseState):
 
         # 2. 识别 (使用 general 模型)
         res, _ = self.detect(self.ctx.model_general, conf=0.3)
+        if self.handle_global_popups(res):
+            return self # 如果处理了弹窗，直接结束本帧，下一帧重新评估环境
 
         # 3. 决策逻辑
         # [场景A] 如果已经在 K28 场景 (有时候点击了但没反应过来)
@@ -517,7 +555,8 @@ class StateK28Zone(BaseState):
         # 2. 识别 (使用 k28 模型)
         res, _ = self.detect(self.ctx.model_k28, conf=0.3, imgsz=320)
         res_gen, _ = self.detect(self.ctx.model_general, conf=0.3)
-
+        if self.handle_global_popups(res_gen):
+            return self # 如果处理了弹窗，直接结束本帧，下一帧重新评估环境
         # 3. 决策逻辑
         flame_id = self.ctx.pos_obj.get('flame', -1.0) # 可能的目标标志
         # [场景A] 可能已经位于战斗界面
@@ -710,6 +749,8 @@ class StateCombat(BaseState):
 
         # 2. 识别 (使用 general 模型)
         res, _ = self.detect(self.ctx.model_general, conf=0.3)
+        if self.handle_global_popups(res):
+            return self # 如果处理了弹窗，直接结束本帧，下一帧重新评估环境
         
         # [场景A] 战斗胜利 (达摩或箱子)
         success_damo = self.ctx.pos_obj.get('success-damo', -1.0)
@@ -789,6 +830,8 @@ class StateSettlement(BaseState):
         
         # 2. 识别 (使用两个模型一起)
         res, _ = self.detect(self.ctx.model_general, conf=0.3)
+        if self.handle_global_popups(res):
+            return self # 如果处理了弹窗，直接结束本帧，下一帧重新评估环境
         # res_k28, _ = self.detect(self.ctx.model_k28, conf=0.3, imgsz=320)
         
         # 3. 决策逻辑

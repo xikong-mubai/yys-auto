@@ -174,7 +174,7 @@ def k28_check(image):
 
 def no_k28_check(image):
     try:
-        result = model_tupo(image,imgsz=640,conf=0.3)
+        result = model_tupo(image,imgsz=640,conf=0.1)
     except Exception as e:
         print("模型识别遇到问题",e)
         return False,e,None

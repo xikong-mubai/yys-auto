@@ -37,6 +37,9 @@ class GameContext:
         # 加载配置中的坐标映射 (直接引用 yys_config 中的定义)
         self.pos_obj = yys_config.pos_obj
         self.k28_obj = yys_config.k28_obj
+        self.k28_common_click = [0.90,0.66,0.95,0.72]
+        self.realm_common_click = [0.05,0.66,0.10,0.72]
+        self.common_click =  self.k28_common_click
 
         # 初始化模型
         self._init_models()
@@ -260,7 +263,7 @@ class BaseState(ABC):
             if id_accept in res:
                 print("\n>>> [拦截] 发现好友悬赏/协作邀请，自动点击【接受】！")
                 target = self.find_best_click_pos(res[id_accept])
-                # self.click_xy(target)
+                self.click_xy(target)
             # 如果你想拒绝，或者没有识别到接受，但识别到了拒绝
             elif id_refuse in res:
                 print("\n>>> [拦截] 发现好友悬赏邀请，自动点击【拒绝】！")
@@ -313,6 +316,7 @@ class StateExploration(BaseState):
             print("\n>>> 突破门票达标，进入突破")
             target = self.find_best_click_pos(res[realm_logo], rule='bottom')
             self.click_xy(target)
+            sleep(0.6)
             # return StateTupoList(self.ctx) # 突破界面和k28入口界面很像，可以先切到k28入口的状态逻辑里再细分
         # [场景D] 发现k28入口 -> 点击 -> 进入k28入口
         elif k28_box_small in res and realm_logo in res:
@@ -321,7 +325,7 @@ class StateExploration(BaseState):
                 print("\n>>> 发现k28入口，点击进入")
                 target = self.find_best_click_pos(res[k28_box_small], rule='bottom')
                 self.click_xy( target)
-                sleep(0.5) # 等待动画
+                sleep(0.6) # 等待动画
                 # return StateK28Box(self.ctx)
         
         return self
@@ -364,9 +368,9 @@ class StateTupoList(BaseState):
 
         xyxy_wait,xyxy_success = self._tupo_dedup(tmp_xyxy_wait,tmp_xyxy_success)
         xyxy_again,xyxy_success = self._tupo_dedup(tmp_xyxy_again,xyxy_success)
-        xyxy_wait,xyxy_again = self._tupo_dedup(xyxy_wait,xyxy_again)
+        xyxy_wait,xyxy_again = self._tupo_dedup(tmp_xyxy_wait,xyxy_again)
 
-        return xyxy_wait,xyxy_again,xyxy_success
+        return tmp_xyxy_wait,xyxy_again,xyxy_success
 
     def on_enter(self):
         print(">>> [状态] 突破界面")
@@ -378,7 +382,7 @@ class StateTupoList(BaseState):
             return self # 画面获取失败，下一帧再试
 
         # 2. 识别 (使用 general 模型)
-        res, _ = self.detect(self.ctx.model_general, conf=0.3)
+        res, _ = self.detect(self.ctx.model_general, conf=0.1)
         if self.handle_global_popups(res):
             return self # 如果处理了弹窗，直接结束本帧，下一帧重新评估环境
         
@@ -388,9 +392,13 @@ class StateTupoList(BaseState):
         realm_success = self.ctx.pos_obj.get('realm-success', -1.0)
         wait_targets, again_targets, success_targets = self._tupo_pos_check(res,realm_wait,realm_again,realm_success)
         self.ctx.realm_target_num = len(wait_targets)+ len(again_targets)
+        if yys_config.flag %2 ==1:
+            print("    wait(%d):", len(wait_targets), wait_targets)
+            print("    again(%d):", len(again_targets), again_targets)
+            print("    success(%d):", len(success_targets), success_targets)
         if self.ctx.realm_target_num + len(success_targets) != 9 :#and self.ctx.realm_target_num > 0:
             print(">>> 识别出现问题，建议关闭突破功能等待优化后使用...\a")
-
+            return self
         # [场景A] 已经回到探索界面了 (有时候点击了但没反应过来)
         realm_logo = self.ctx.pos_obj.get('realm-logo', -1.0)
         if realm_logo in res:
@@ -409,19 +417,24 @@ class StateTupoList(BaseState):
             self.ctx.situation = 0
             target = self.find_best_click_pos(res[id_exit], rule='right')
             self.click_xy(target)
+            sleep(0.6)
             # sleep(1.0) # 等待动画
             # return StateExploration(self.ctx)
         # [场景D] 优先打未打过的
         elif realm_wait in res:
             print(">>> 发现新目标准备进攻...")
             target = self.find_best_click_pos(wait_targets, rule='left')
+            target = [(target[2] + target[0])/2,target[1],target[2],target[3]]
             self.click_xy(target)
+            sleep(0.9)
             #return StateTupoConfrim(self.ctx) # 突破确认界面
         # [场景D] 其次打多次挑战的
         elif realm_again in res:
             print(">>> 突破界面加载完成，进入突破列表")
             target = self.find_best_click_pos(again_targets, rule='left')
+            target = [(target[2] + target[0])/2,target[1],target[2],target[3]]
             self.click_xy(target)
+            sleep(0.9)
             #return StateTupoConfrim(self.ctx) # 突破列表界面
         
         return self
@@ -434,6 +447,7 @@ class StateTupoList(BaseState):
 class StateTupoConfrim(BaseState):
     def on_enter(self):
         print(">>> [状态] 突破进攻确认")
+        self.ctx.realm_tickets -= 1
         
     def execute(self):
         # 1. 刷新画面
@@ -441,7 +455,7 @@ class StateTupoConfrim(BaseState):
             return self # 画面获取失败，下一帧再试
 
         # 2. 识别 (使用 general 模型)
-        res, _ = self.detect(self.ctx.model_general, conf=0.3)
+        res, _ = self.detect(self.ctx.model_general, conf=0.2)
         if self.handle_global_popups(res):
             return self # 如果处理了弹窗，直接结束本帧，下一帧重新评估环境
 
@@ -513,6 +527,7 @@ class StateK28Box(BaseState):
                     # 设置标记位，开始返回探索前往突破
                     self.ctx.situation = 1
                     self.ctx.realm_tickets = tupo_ticket
+                    self.ctx.common_click = self.ctx.realm_common_click
                     return self
             # [场景D] 检测 'k28-box-big' 大盒子，点击确认按钮进入k28Zone
             k28_box_big = self.ctx.pos_obj.get('k28-box-big', -1.0)
@@ -521,14 +536,15 @@ class StateK28Box(BaseState):
                 print(">>> 发现确认按钮，点击进入k28场景")
                 target = self.find_best_click_pos(res[confirm_id], rule='right')
                 self.click_xy(target)
-                sleep(0.5) # 等待动画                
+                self.ctx.common_click = self.ctx.k28_common_click
+                sleep(0.6) # 等待动画                
         else:
             common_red_exit = self.ctx.pos_obj.get('common-red-exit', -1.0)
             if common_red_exit in res:
                 print(">>> 返回探索...")
                 target = self.find_best_click_pos(res[common_red_exit], rule='right')
                 self.click_xy(target)
-                sleep(0.5) # 等待动画
+                sleep(0.6) # 等待动画
 
         # 如果啥都没找到，继续等
         return self
@@ -603,7 +619,7 @@ class StateK28Zone(BaseState):
                 if target:
                     print(f">>> 锁定目标 (优先级策略), 点击进攻")
                     self.click_xy(target)
-                    sleep(0.2) # 等待动画
+                    sleep(0.3) # 等待动画
                     return self #StateCombat(self.ctx)
                 else:
                     print(">>> 未能选出合适目标，继续搜索...")
@@ -636,7 +652,7 @@ class StateK28Zone(BaseState):
                     print(">>> 没有高收益目标，点击传送门退出")
                     target = self.find_best_click_pos(res_gen[exit_id])
                     self.click_xy(target)
-                    sleep(0.1) # 等待动画
+                    sleep(0.3) # 等待动画
                 else:
                     print(">>> 未发现退出按钮，存在问题...")
         else:
@@ -718,8 +734,8 @@ class StateK28Zone(BaseState):
         self.ctx.move_count += 1
         # 每几次尝试点一下右边，模拟移动
         # 注意：这里最好实现真正的 Drag/Swipe，或者点击边缘
-        self.click_xy([0.90,0.66,0.95,0.72])
-        sleep(0.01) # 等待画面更新
+        self.click_xy(self.ctx.k28_common_click)
+        sleep(0.1) # 等待画面更新
         
 
 # --- 状态：战斗中 ---
@@ -797,15 +813,15 @@ class StateCombat(BaseState):
                 print(">>> 已发现投降确认按钮，点击投降...")
                 target = self.find_best_click_pos(res[common_red_cancel], rule='right')
                 self.click_xy(target) # 点击投降按钮
-                sleep(0.1) # 等待动画
+                sleep(0.3) # 等待动画
             elif attack_exit in res and self.ctx.realm_exit_flag == 1:
                 print(">>> 突破仅剩最后一个目标，投降一次...")
                 target = self.find_best_click_pos(res[attack_exit])
                 self.click_xy(target) # 点击退出按钮
-                sleep(0.1) # 等待动画
+                sleep(0.3) # 等待动画
         # [场景D] 战斗中 or 并未发生战斗
         elif attack_exit in res and auto_logo in res:
-            print(">>> 战斗中")
+            print(">>> 战斗中\r", end="")
 
 
         return self
@@ -823,6 +839,8 @@ class StateSettlement(BaseState):
         self.big_num = 0
         self.k28_num = 0
         self.realm_count = 0
+        if self.ctx.situation == 1 and self.ctx.realm_exit_flag == 1:
+            self.ctx.realm_tickets += 1
 
     def execute(self):
         # 1. 刷新画面
@@ -839,11 +857,11 @@ class StateSettlement(BaseState):
         success_damo = self.ctx.pos_obj.get("success-damo",-1.0)
         if success_damo in res:
             # self.click_xy( [0.8, 0.8, 0.9, 0.9])
-            self.click_xy([0.90,0.66,0.95,0.72])
+            self.click_xy(self.ctx.common_click)
             sleep(0.3) 
         # 简单粗暴的结算逻辑：有东西就点，没东西点空白，直到看到探索界面
         elif time.time() - self.pre_click_time > 0.15:
-            self.click_xy([0.90,0.66,0.95,0.72])
+            self.click_xy(self.ctx.common_click)
             self.pre_click_time = time.time()
             self.click_count += 1
 
@@ -924,7 +942,7 @@ class GameEngine:
                 
                 # 3. 只有当没有进行任何耗时操作时，才sleep，防止CPU占用过高
                 # 但execute内部通常包含了识别和点击，所以这里给一个微小的sleep即可
-                sleep(0.01)
+                sleep(0.02)
                 
         except KeyboardInterrupt:
             print("\n>>> 用户停止")
